@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { ScheduleModule } from '@nestjs/schedule';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PrismaModule } from './prisma/prisma.module';
@@ -10,7 +11,7 @@ import { DireccionesModule } from './direcciones/direcciones.module';
 import { ProductosModule } from './productos/productos.module';
 
 @Module({
-  imports: [PrismaModule, CarritoModule, PedidosModule, PagosModule, EnviosModule, DireccionesModule, ProductosModule],
+  imports: [ScheduleModule.forRoot(), PrismaModule, CarritoModule, PedidosModule, PagosModule, EnviosModule, DireccionesModule, ProductosModule],
   controllers: [AppController],
   providers: [AppService],
 })

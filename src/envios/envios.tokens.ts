@@ -1,0 +1,1 @@
+export const ENVIO_REPOSITORY = 'ENVIO_REPOSITORY';

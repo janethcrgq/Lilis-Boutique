@@ -1,0 +1,2 @@
+export const PAGO_REPOSITORY = 'PAGO_REPOSITORY';
+export const PASARELA_PAGOS = 'PASARELA_PAGOS';
