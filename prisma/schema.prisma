@@ -12,9 +12,10 @@ datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
 }
+
 enum Rol {
   CLIENTE
-  DUENA      @map("DUEÑA")
+  DUENA     @map("DUEÑA")
   VENDEDORA
 }
 
@@ -24,26 +25,32 @@ enum Tallas {
   M
   L
   XL
-  T22    @map("22")
-  T22_5  @map("22.5")
-  T23    @map("23")
-  T23_5  @map("23.5")
-  T24    @map("24")
-  T24_5  @map("24.5")
-  T25    @map("25")
-  T25_5  @map("25.5")
-  T26    @map("26")
-  T26_5  @map("26.5")
-  T27    @map("27")
+  T22      @map("22")
+  T22_5    @map("22.5")
+  T23      @map("23")
+  T23_5    @map("23.5")
+  T24      @map("24")
+  T24_5    @map("24.5")
+  T25      @map("25")
+  T25_5    @map("25.5")
+  T26      @map("26")
+  T26_5    @map("26.5")
+  T27      @map("27")
   UNITALLA
 }
 
 enum EstadoPedido {
   EN_CARRITO
-  PENDIENTE
+  PENDIENTE_DE_PAGO
+  PAGADO
   ENVIADO
   ENTREGADO
   CANCELADO
+}
+
+enum MetodoEntrega {
+  DOMICILIO
+  RECOGER_EN_BOUTIQUE
 }
 
 enum FormaPago {
@@ -56,10 +63,255 @@ enum EstadoPago {
   PENDIENTE
   APROBADO
   RECHAZADO
+  CANCELADO
 }
 
 enum EstadoEnvio {
   PREPARANDO
   EN_CAMINO
   ENTREGADO
+}
+
+model Usuario {
+  idUsuario       Int      @id @default(autoincrement())
+  nombre          String
+  apellido        String
+  correo          String   @unique
+  contraseniaHash String
+  telefono        String?
+  rol             Rol
+  cliente         Cliente?
+  compras         Compra[]
+}
+
+model Cliente {
+  idUsuario   Int         @id
+  usuario     Usuario     @relation(fields: [idUsuario], references: [idUsuario])
+  direcciones Direccion[]
+  pedidos     Pedido[]
+  resenas     Resena[]
+}
+
+model ZonaEnvio {
+  idZona      Int         @id @default(autoincrement())
+  nombre      String
+  costoEnvio  Decimal     @db.Decimal(10, 2)
+  direcciones Direccion[]
+}
+
+model Direccion {
+  idDireccion Int       @id @default(autoincrement())
+  idCliente   Int
+  idZona      Int
+  calle       String
+  numeroCasa  String
+  colonia     String
+  referencias String?
+  cliente     Cliente   @relation(fields: [idCliente], references: [idUsuario])
+  zona        ZonaEnvio @relation(fields: [idZona], references: [idZona])
+  envios      Envio[]
+}
+
+model Categoria {
+  idCategoria Int        @id @default(autoincrement())
+  nombre      String
+  descripcion String?
+  productos   Producto[]
+}
+
+model Producto {
+  idProducto  Int                @id @default(autoincrement())
+  idCategoria Int
+  nombre      String
+  descripcion String?            @db.Text
+  precio      Decimal            @db.Decimal(10, 2)
+  categoria   Categoria          @relation(fields: [idCategoria], references: [idCategoria])
+  variantes   VarianteProducto[]
+  resenas     Resena[]
+}
+
+model VarianteProducto {
+  idVariante         Int                 @id @default(autoincrement())
+  idProducto         Int
+  talla              Tallas
+  color              String
+  imagenURL          String?
+  stock              Int                 @default(0)
+  producto           Producto            @relation(fields: [idProducto], references: [idProducto])
+  detallesPedido     DetallePedido[]
+  reservas           Reserva[]
+  salidas            SalidaInventario[]
+  detallesCompra     DetalleCompra[]
+  devolucionesCambio DevolucionCliente[]
+}
+
+model Resena {
+  idResena     Int      @id @default(autoincrement())
+  idCliente    Int
+  idProducto   Int
+  calificacion Int
+  comentario   String?  @db.Text
+  fecha        DateTime @default(now())
+  cliente      Cliente  @relation(fields: [idCliente], references: [idUsuario])
+  producto     Producto @relation(fields: [idProducto], references: [idProducto])
+}
+
+model SalidaInventario {
+  idSalida   Int              @id @default(autoincrement())
+  idVariante Int
+  fecha      DateTime         @default(now())
+  motivo     String
+  cantidad   Int
+  variante   VarianteProducto @relation(fields: [idVariante], references: [idVariante])
+}
+
+model Pedido {
+  idPedido        Int             @id @default(autoincrement())
+  idCliente       Int
+  numPedido       String?         @unique
+  fecha           DateTime        @default(now())
+  subtotal        Decimal         @default(0) @db.Decimal(10, 2)
+  total           Decimal         @default(0) @db.Decimal(10, 2)
+  estadoPedido    EstadoPedido    @default(EN_CARRITO)
+  metodoEntrega   MetodoEntrega?
+  fechaLimitePago DateTime?
+  cliente         Cliente         @relation(fields: [idCliente], references: [idUsuario])
+  detalles        DetallePedido[]
+  reservas        Reserva[]
+  pagos           Pago[]
+  envio           Envio?
+  apartado        Apartado?
+}
+
+model DetallePedido {
+  idDetallePedido Int                 @id @default(autoincrement())
+  idPedido        Int
+  idVariante      Int
+  cantidad        Int
+  precioUnitario  Decimal             @db.Decimal(10, 2)
+  pedido          Pedido              @relation(fields: [idPedido], references: [idPedido])
+  variante        VarianteProducto    @relation(fields: [idVariante], references: [idVariante])
+  devoluciones    DevolucionCliente[]
+}
+
+model Reserva {
+  idReserva  Int              @id @default(autoincrement())
+  idPedido   Int
+  idVariante Int
+  cantidad   Int
+  expiraEn   DateTime
+  pedido     Pedido           @relation(fields: [idPedido], references: [idPedido])
+  variante   VarianteProducto @relation(fields: [idVariante], references: [idVariante])
+}
+
+model Apartado {
+  idPedido       Int      @id
+  folio          String   @unique
+  fechaLimite    DateTime
+  montoApartado  Decimal  @db.Decimal(10, 2)
+  estadoApartado String
+  pedido         Pedido   @relation(fields: [idPedido], references: [idPedido])
+}
+
+model Envio {
+  idEnvio          Int         @id @default(autoincrement())
+  idPedido         Int         @unique
+  idDireccion      Int
+  linkSeguimiento  String?
+  nombreRepartidor String?
+  placas           String?
+  costoEnvio       Decimal     @db.Decimal(10, 2)
+  estadoEnvio      EstadoEnvio @default(PREPARANDO)
+  pedido           Pedido      @relation(fields: [idPedido], references: [idPedido])
+  direccion        Direccion   @relation(fields: [idDireccion], references: [idDireccion])
+}
+
+model Pago {
+  idPago            Int                @id @default(autoincrement())
+  idPedido          Int
+  monto             Decimal            @db.Decimal(10, 2)
+  fecha             DateTime           @default(now())
+  estadoPago        EstadoPago         @default(PENDIENTE)
+  metodo            FormaPago
+  pedido            Pedido             @relation(fields: [idPedido], references: [idPedido])
+  pagoTarjeta       PagoTarjeta?
+  pagoTransferencia PagoTransferencia?
+  pagoContraEntrega PagoContraEntrega?
+}
+
+model PagoTarjeta {
+  idPago            Int     @id
+  idTransaccion     String?
+  respuestaPasarela String? @db.Text
+  pago              Pago    @relation(fields: [idPago], references: [idPago])
+}
+
+model PagoTransferencia {
+  idPago           Int     @id
+  numeroReferencia String?
+  comprobanteURL   String?
+  pago             Pago    @relation(fields: [idPago], references: [idPago])
+}
+
+model PagoContraEntrega {
+  idPago Int    @id
+  folio  String @unique
+  pago   Pago   @relation(fields: [idPago], references: [idPago])
+}
+
+model Proveedor {
+  idProveedor Int      @id @default(autoincrement())
+  nombre      String
+  telefono    String?
+  correo      String?
+  compras     Compra[]
+}
+
+model Compra {
+  idCompra    Int             @id @default(autoincrement())
+  idUsuario   Int
+  idProveedor Int
+  folio       String          @unique
+  fecha       DateTime        @default(now())
+  total       Decimal         @db.Decimal(10, 2)
+  usuario     Usuario         @relation(fields: [idUsuario], references: [idUsuario])
+  proveedor   Proveedor       @relation(fields: [idProveedor], references: [idProveedor])
+  detalles    DetalleCompra[]
+}
+
+model DetalleCompra {
+  idDetalleCompra Int                   @id @default(autoincrement())
+  idCompra        Int
+  idVariante      Int
+  cantidad        Int
+  costo           Decimal               @db.Decimal(10, 2)
+  compra          Compra                @relation(fields: [idCompra], references: [idCompra])
+  variante        VarianteProducto      @relation(fields: [idVariante], references: [idVariante])
+  devoluciones    DevolucionProveedor[]
+}
+
+model Devolucion {
+  idDevolucion        Int                  @id @default(autoincrement())
+  fecha               DateTime             @default(now())
+  motivo              String
+  cantidad            Int
+  estadoProducto      String
+  devolucionCliente   DevolucionCliente?
+  devolucionProveedor DevolucionProveedor?
+}
+
+model DevolucionCliente {
+  idDevolucion     Int               @id
+  idDetallePedido  Int
+  idVarianteCambio Int?
+  devolucion       Devolucion        @relation(fields: [idDevolucion], references: [idDevolucion])
+  detallePedido    DetallePedido     @relation(fields: [idDetallePedido], references: [idDetallePedido])
+  varianteCambio   VarianteProducto? @relation(fields: [idVarianteCambio], references: [idVariante])
+}
+
+model DevolucionProveedor {
+  idDevolucion    Int           @id
+  idDetalleCompra Int
+  devolucion      Devolucion    @relation(fields: [idDevolucion], references: [idDevolucion])
+  detalleCompra   DetalleCompra @relation(fields: [idDetalleCompra], references: [idDetalleCompra])
 }
