@@ -1,0 +1,65 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+enum Rol {
+  CLIENTE
+  DUENA      @map("DUEÑA")
+  VENDEDORA
+}
+
+enum Tallas {
+  XS
+  S
+  M
+  L
+  XL
+  T22    @map("22")
+  T22_5  @map("22.5")
+  T23    @map("23")
+  T23_5  @map("23.5")
+  T24    @map("24")
+  T24_5  @map("24.5")
+  T25    @map("25")
+  T25_5  @map("25.5")
+  T26    @map("26")
+  T26_5  @map("26.5")
+  T27    @map("27")
+  UNITALLA
+}
+
+enum EstadoPedido {
+  EN_CARRITO
+  PENDIENTE
+  ENVIADO
+  ENTREGADO
+  CANCELADO
+}
+
+enum FormaPago {
+  TARJETA
+  TRANSFERENCIA
+  CONTRA_ENTREGA
+}
+
+enum EstadoPago {
+  PENDIENTE
+  APROBADO
+  RECHAZADO
+}
+
+enum EstadoEnvio {
+  PREPARANDO
+  EN_CAMINO
+  ENTREGADO
+}
