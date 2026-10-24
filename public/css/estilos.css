@@ -1,0 +1,1391 @@
+/*
+  Estilos de todas las paginas de Lili's Boutique.
+  Salen de las pantallas de Figma. Antes de escribir CSS nuevo, revisar si ya hay una clase.
+
+  Secciones:
+   1. Colores y letras
+   2. Base
+   3. Cabecera
+   4. Pasos 01-04 y contador
+   5. Columnas y titulos
+   6. Prendas
+   7. Totales
+   8. Botones y enlaces
+   9. Opciones tipo radio
+  10. Campos de formulario
+  11. Avisos
+  12. Estado del pedido y cajas
+  13. Catalogo
+  14. Tablas y pestanas
+  15. Pie
+  16. Celular y tablet
+*/
+
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&family=Playfair+Display:wght@400;500&display=swap');
+
+
+/* ========== 1. Colores y letras ========== */
+
+:root {
+  /* Morados y lilas de la marca */
+  --color-lila: #EEEAFB;          /* fondo de la cabecera */
+  --color-lila-borde: #DED6F5;    /* bordes sobre lila */
+  --color-morado: #4B1F7A;        /* textos e iconos de la marca */
+  --color-morado-claro: #7A4FC0;  /* detalles */
+
+  /* Negros y grises */
+  --color-negro: #121212;         /* titulos y botones */
+  --color-texto: #2B2B2B;         /* texto normal */
+  --color-gris: #727272;          /* texto secundario */
+  --color-gris-claro: #A6A6A6;    /* texto deshabilitado */
+  --color-linea: #E7E7E7;         /* lineas que separan */
+  --color-fondo-gris: #F8F8F8;    /* fondos grises suaves */
+  --color-blanco: #FFFFFF;
+
+  /* Avisos: color del texto y color del fondo */
+  --color-error: #A8261B;
+  --color-error-fondo: #FDF1EF;
+  --color-ok: #1F6B45;
+  --color-ok-fondo: #EDF7F1;
+  --color-alerta: #8A5A00;
+  --color-alerta-fondo: #FFF7E6;
+  --color-info-fondo: #F5F2FD;
+
+  /* Letras */
+  --letra-titulos: 'Playfair Display', Georgia, serif;
+  --letra-texto: 'Inter', system-ui, sans-serif;
+  --letra-numeros: 'IBM Plex Mono', monospace;   /* precios y folios */
+}
+
+
+/* ========== 2. Base ========== */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-blanco);
+  color: var(--color-texto);
+  font-family: var(--letra-texto);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+svg {
+  display: block;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+/* Esconde cualquier elemento. Desde JS: mostrar('id', false) */
+.oculto {
+  display: none !important;
+}
+
+/* Contenido de la pagina */
+main {
+  flex: 1;
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 56px 64px 72px;
+  position: relative;
+}
+
+
+/* ========== 3. Cabecera (la pinta plantilla.js) ========== */
+
+.barra {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 0 40px;
+  background: var(--color-lila);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--color-negro);
+}
+
+.logo b {
+  display: block;
+  font-family: var(--letra-titulos);
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: .18em;
+  line-height: 1.1;
+}
+
+.logo small {
+  display: block;
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: .42em;
+  color: var(--color-morado-claro);
+}
+
+.nav {
+  display: flex;
+  gap: 36px;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: .08em;
+}
+
+.nav a.activo {
+  border-bottom: 1.5px solid var(--color-negro);
+  padding-bottom: 3px;
+}
+
+.iconos {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  font-size: 12px;
+  color: var(--color-negro);
+}
+
+.bolsa-ico {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Selector "Entrar como" */
+.sesion {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px 4px 4px;
+  border: 1px solid var(--color-lila-borde);
+  border-radius: 999px;
+  background: var(--color-blanco);
+  font-size: 12px;
+}
+
+.sesion i {
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--color-morado);
+  color: var(--color-blanco);
+  font-style: normal;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.sesion label {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.sesion small {
+  font-size: 10px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--color-gris);
+}
+
+.sesion select {
+  border: 0;
+  background: transparent;
+  font-size: 12px;
+  color: var(--color-negro);
+  cursor: pointer;
+}
+
+
+/* ========== 4. Pasos 01-04 y contador de la reserva ========== */
+
+.pasos {
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 0 40px;
+  background: var(--color-fondo-gris);
+  border-bottom: 1px solid var(--color-linea);
+}
+
+.pasos ol {
+  display: flex;
+  list-style: none;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: .08em;
+  color: var(--color-gris-claro);
+}
+
+/* La diagonal entre un paso y otro */
+.pasos li + li::before {
+  content: "/";
+  display: inline-block;
+  margin: 0 20px;
+  color: #D0D0D0;
+}
+
+.pasos li.hecho span {
+  text-decoration: line-through;
+}
+
+.pasos li.activo span {
+  color: var(--color-negro);
+  font-weight: 600;
+  border-bottom: 2px solid var(--color-negro);
+  padding-bottom: 4px;
+}
+
+.reloj {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: .06em;
+  color: var(--color-morado);
+}
+
+.reloj b {
+  padding: 2px 8px;
+  border: 1px solid var(--color-lila-borde);
+  background: var(--color-blanco);
+  font-family: var(--letra-numeros);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.reloj.vencida {
+  color: var(--color-error);
+}
+
+.seguro {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: .08em;
+  color: var(--color-gris);
+}
+
+
+/* ========== 5. Columnas y titulos ========== */
+
+/* Contenido a la izquierda y resumen de 400px a la derecha */
+.dos {
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: 72px;
+  align-items: start;
+}
+
+/* La columna del resumen */
+.lado {
+  border-left: 1px solid var(--color-linea);
+  padding-left: 40px;
+}
+
+h1 {
+  margin-bottom: 6px;
+  font-family: var(--letra-titulos);
+  font-size: 34px;
+  font-weight: 400;
+  line-height: 1.2;
+  color: var(--color-negro);
+}
+
+h2 {
+  font-family: var(--letra-titulos);
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 1.3;
+  color: var(--color-negro);
+}
+
+h3 {
+  font-family: var(--letra-titulos);
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 1.3;
+  color: var(--color-negro);
+}
+
+/* La letra de los titulos dibuja los numeros desiguales; asi quedan parejos */
+h1,
+h2,
+h3,
+.total span {
+  font-variant-numeric: lining-nums;
+}
+
+/* Texto gris debajo del h1 */
+.sub {
+  margin-bottom: 32px;
+  color: var(--color-gris);
+}
+
+/* Etiqueta gris en mayusculas, por ejemplo "METODO DE ENTREGA" */
+.rotulo {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--color-gris);
+}
+
+/* Un rotulo que va arriba de opciones o campos */
+.titulo-bloque {
+  margin-bottom: 12px;
+}
+
+/* Separa un grupo de opciones o de campos del anterior */
+.bloque {
+  margin-top: 32px;
+}
+
+/* Titulo con texto a la derecha y linea abajo: "Resumen de Compra   4 PRENDAS" */
+.cabeza {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--color-linea);
+}
+
+.mono {
+  font-family: var(--letra-numeros);
+}
+
+.meta {
+  font-size: 12px;
+  color: var(--color-gris);
+}
+
+.nota {
+  margin-top: 10px;
+  font-size: 13px;
+}
+
+.centro {
+  text-align: center;
+}
+
+
+/* ========== 6. Prendas ========== */
+
+/* Cuadro de la foto (o del dibujo mientras no hay fotos). Lo pinta foto() */
+.foto {
+  display: grid;
+  place-items: center;
+  background: linear-gradient(160deg, #F4F1FA, #E3DCF2);
+  color: #8C7AB6;
+}
+
+.foto svg {
+  width: 46%;
+  height: 46%;
+}
+
+.foto img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Prenda grande de la bolsa: foto, datos y subtotal */
+.item {
+  display: grid;
+  grid-template-columns: 104px 1fr auto;
+  gap: 22px;
+  padding: 22px 0;
+  border-bottom: 1px solid var(--color-linea);
+}
+
+.item .foto {
+  height: 132px;
+}
+
+.item .der {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+/* Prenda sin existencia (2.2.6-A) */
+.item.error {
+  background: linear-gradient(90deg, var(--color-error-fondo), transparent 70%);
+}
+
+.item.error .cant {
+  border-color: var(--color-error);
+}
+
+/* Botones - 1 + */
+.cant {
+  display: inline-flex;
+  align-items: center;
+  height: 34px;
+  margin-top: 18px;
+  border: 1px solid #CFCFCF;
+}
+
+.cant button {
+  width: 34px;
+  height: 100%;
+  color: var(--color-gris);
+}
+
+.cant b {
+  width: 34px;
+  text-align: center;
+  font-weight: 500;
+  color: var(--color-negro);
+}
+
+.quitar {
+  font-size: 18px;
+  line-height: 1;
+  color: var(--color-gris);
+}
+
+.nota-error {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--color-error);
+}
+
+.precio {
+  font-family: var(--letra-numeros);
+  font-size: 15px;
+  font-weight: 500;
+  text-align: right;
+  color: var(--color-negro);
+}
+
+/* Prenda chica de los resumenes */
+.mini {
+  display: grid;
+  grid-template-columns: 56px 1fr auto;
+  gap: 16px;
+  align-items: center;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--color-linea);
+}
+
+.mini .foto {
+  height: 64px;
+}
+
+.mini b {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-negro);
+}
+
+
+/* ========== 7. Totales ========== */
+
+.totales {
+  padding-top: 16px;
+}
+
+/* Un renglon: "Subtotal ......... $1,956.00" */
+.fila {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 7px 0;
+  font-size: 13px;
+}
+
+.fila .mono {
+  color: var(--color-negro);
+}
+
+/* Envio gratis en verde */
+.fila.cortesia .mono {
+  color: var(--color-ok);
+}
+
+.total {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-top: 14px;
+  padding-top: 18px;
+  border-top: 1px solid var(--color-negro);
+}
+
+.total strong {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .1em;
+}
+
+.total span {
+  font-family: var(--letra-titulos);
+  font-size: 26px;
+  font-weight: 500;
+  color: var(--color-negro);
+}
+
+
+/* ========== 8. Botones y enlaces ========== */
+
+/* Boton negro. Ocupa todo el ancho salvo dentro de .acciones */
+.btn {
+  width: 100%;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 0 32px;
+  border: 0;
+  background: var(--color-negro);
+  color: var(--color-blanco);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.btn:hover {
+  background: #2E2E2E;
+}
+
+/* Boton blanco con borde */
+.btn.sec {
+  background: var(--color-blanco);
+  color: var(--color-negro);
+  border: 1px solid var(--color-negro);
+}
+
+.btn.sec:hover {
+  background: var(--color-fondo-gris);
+}
+
+/* Boton pequeno, para tablas */
+.btn.chico {
+  width: auto;
+  height: 36px;
+  padding: 0 16px;
+  font-size: 11px;
+}
+
+.btn:disabled {
+  background: #D4D4D4;
+  color: var(--color-blanco);
+  cursor: not-allowed;
+}
+
+/* Enlace gris en mayusculas: "VOLVER A LA BOLSA" */
+.enlace {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--color-gris);
+  cursor: pointer;
+}
+
+.enlace:hover {
+  color: var(--color-negro);
+}
+
+/* Enlace subrayado: "+ AGREGAR OTRA DIRECCION" */
+.enlace.sub-r {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Barra de abajo: "Volver" a la izquierda y el boton a la derecha */
+.acciones {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-top: 40px;
+  padding-top: 28px;
+  border-top: 1px solid var(--color-linea);
+}
+
+.acciones .btn {
+  width: auto;
+}
+
+/* Boton con un texto abajo, en el resumen */
+.pila {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+
+/* ========== 9. Opciones tipo radio ========== */
+/*
+  <label class="opcion">
+    <input type="radio" name="metodo" value="DOMICILIO">
+    <span class="radio"></span>
+    <span class="txt"><b>Titulo</b><small>Detalle</small></span>
+    <span class="der-op">$50.00</span>
+  </label>
+
+  El <input> real esta escondido y se dibuja .radio en su lugar.
+  ":has(input:checked)" significa "la opcion que tiene su input marcado":
+  asi el borde negro se pone solo al elegirla, sin JS.
+  Si el input esta disabled, la opcion se ve gris.
+*/
+
+.opcion {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 10px;
+  padding: 18px 20px;
+  border: 1px solid var(--color-linea);
+  cursor: pointer;
+}
+
+.opcion input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.radio {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1.5px solid #B5B5B5;
+  background: var(--color-blanco);
+}
+
+.opcion .txt {
+  flex: 1;
+}
+
+.opcion .txt b {
+  display: block;
+  font-weight: 500;
+  color: var(--color-negro);
+}
+
+.opcion .txt small {
+  font-size: 12px;
+  color: var(--color-gris);
+}
+
+/* Texto o precio a la derecha */
+.der-op {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--letra-numeros);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-negro);
+}
+
+/* Opcion elegida */
+.opcion:has(input:checked) {
+  border: 1.5px solid var(--color-negro);
+}
+
+.opcion:has(input:checked) .radio {
+  border: 5px solid var(--color-negro);
+}
+
+/* Opcion bloqueada (por ejemplo contra entrega con envio a domicilio) */
+.opcion:has(input:disabled) {
+  background: var(--color-fondo-gris);
+  cursor: not-allowed;
+}
+
+.opcion:has(input:disabled) b,
+.opcion:has(input:disabled) .der-op {
+  color: var(--color-gris-claro) !important;
+}
+
+/* Cuadrito con la marca de tarjeta: VISA, MC, AMEX */
+.marca {
+  padding: 1px 6px;
+  border: 1px solid #D4D4D4;
+  font-family: var(--letra-numeros);
+  font-size: 9px;
+  font-weight: 500;
+  color: var(--color-gris);
+}
+
+
+/* ========== 10. Campos de formulario ========== */
+/*
+  <div class="campo">
+    <label for="calle">Calle *</label>
+    <input id="calle">
+    <p class="ayuda">Texto de ayuda (opcional)</p>
+  </div>
+  Con la clase "error" en el div, la linea y la ayuda se ponen rojas.
+*/
+
+.campo {
+  margin-bottom: 24px;
+}
+
+.campo label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--color-gris);
+}
+
+.campo input,
+.campo select,
+.campo textarea {
+  width: 100%;
+  padding: 6px 0 10px;
+  border: 0;
+  border-bottom: 1px solid #CFCFCF;
+  border-radius: 0;
+  background: transparent;
+  color: var(--color-negro);
+  outline: none;
+}
+
+.campo input:focus,
+.campo select:focus,
+.campo textarea:focus {
+  border-bottom: 1.5px solid var(--color-negro);
+}
+
+.campo input::placeholder,
+.campo textarea::placeholder {
+  color: var(--color-gris-claro);
+}
+
+.campo .ayuda {
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--color-gris);
+}
+
+.campo.error input,
+.campo.error select {
+  border-bottom: 1.5px solid var(--color-error);
+}
+
+.campo.error .ayuda {
+  color: var(--color-error);
+}
+
+/* Campos lado a lado: rejilla = 2 columnas, rejilla3 = 3 columnas */
+.rejilla {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 32px;
+}
+
+.rejilla3 {
+  display: grid;
+  grid-template-columns: 2fr 1fr 2fr;
+  gap: 0 32px;
+}
+
+
+/* ========== 11. Avisos (los pinta mostrarAviso() en <div id="avisos">) ========== */
+
+.aviso {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 28px;
+  padding: 16px 20px;
+  border-left: 3px solid;
+  font-size: 13px;
+}
+
+.aviso svg {
+  flex: none;
+  margin-top: 2px;
+}
+
+.aviso b {
+  display: block;
+  margin-bottom: 2px;
+  font-weight: 600;
+}
+
+.aviso p {
+  color: var(--color-texto);
+}
+
+.aviso.error {
+  background: var(--color-error-fondo);
+  border-color: var(--color-error);
+  color: var(--color-error);
+}
+
+.aviso.ok {
+  background: var(--color-ok-fondo);
+  border-color: var(--color-ok);
+  color: var(--color-ok);
+}
+
+.aviso.info {
+  background: var(--color-info-fondo);
+  border-color: var(--color-morado-claro);
+  color: var(--color-morado);
+}
+
+.aviso.alerta {
+  background: var(--color-alerta-fondo);
+  border-color: var(--color-alerta);
+  color: var(--color-alerta);
+}
+
+
+/* ========== 12. Estado del pedido y cajas ========== */
+
+/* Etiqueta de color: <span class="estado pagado">Pagado</span> */
+.estado {
+  display: inline-block;
+  padding: 3px 10px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.estado.pagado {
+  background: var(--color-ok-fondo);
+  color: var(--color-ok);
+}
+
+.estado.pendiente {
+  background: var(--color-alerta-fondo);
+  color: var(--color-alerta);
+}
+
+.estado.cancelado {
+  background: var(--color-error-fondo);
+  color: var(--color-error);
+}
+
+.estado.revision {
+  background: var(--color-info-fondo);
+  color: var(--color-morado);
+}
+
+/* Recuadro con borde; con "lila" tiene fondo lila */
+.caja {
+  margin-bottom: 24px;
+  padding: 28px;
+  border: 1px solid var(--color-linea);
+}
+
+.caja.lila {
+  background: var(--color-info-fondo);
+  border-color: var(--color-lila-borde);
+}
+
+/* Caja con un icono a la izquierda (recoger en boutique) */
+.caja-icono {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.icono-morado {
+  color: var(--color-morado);
+}
+
+/* Folio grande: CE-000001 */
+.folio {
+  font-family: var(--letra-numeros);
+  font-size: 40px;
+  font-weight: 500;
+  letter-spacing: .06em;
+  color: var(--color-negro);
+}
+
+/* Circulo con icono arriba del titulo: <div class="circulo ok"> */
+.circulo {
+  width: 60px;
+  height: 60px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 20px;
+  border-radius: 50%;
+}
+
+.circulo.ok {
+  background: var(--color-ok-fondo);
+  color: var(--color-ok);
+}
+
+.circulo.error {
+  background: var(--color-error-fondo);
+  color: var(--color-error);
+}
+
+.circulo.info {
+  background: var(--color-info-fondo);
+  color: var(--color-morado);
+}
+
+/* Lista de dos columnas: <dl class="datos"><dt>Pedido</dt><dd>LB-000001</dd></dl> */
+.datos {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  row-gap: 12px;
+  font-size: 14px;
+}
+
+.datos dt {
+  color: var(--color-gris);
+}
+
+.datos dd {
+  font-weight: 500;
+  color: var(--color-negro);
+}
+
+/* Recuadro punteado para subir el comprobante */
+.subir {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 28px;
+  border: 1.5px dashed #C9C0E0;
+  background: var(--color-info-fondo);
+  color: var(--color-morado);
+  text-align: center;
+  cursor: pointer;
+}
+
+/* Archivo ya elegido: [PDF] comprobante.pdf */
+.archivo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border: 1px solid var(--color-linea);
+  font-size: 13px;
+}
+
+.archivo .ext {
+  padding: 6px 8px;
+  background: var(--color-lila);
+  color: var(--color-morado);
+  font-family: var(--letra-numeros);
+  font-size: 10px;
+  font-weight: 600;
+}
+
+/* Mensaje centrado: bolsa vacia, cobro registrado */
+.vacio-box {
+  max-width: 520px;
+  margin: 40px auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  text-align: center;
+}
+
+.vacio-box .circulo {
+  width: 84px;
+  height: 84px;
+  margin: 0 0 8px;
+}
+
+
+/* ========== 13. Catalogo ========== */
+
+.catalogo {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 28px;
+}
+
+.tarjeta .foto {
+  height: 300px;
+}
+
+.tarjeta h3 {
+  margin-top: 14px;
+  font-size: 17px;
+}
+
+.tarjeta .precio {
+  margin-top: 2px;
+  text-align: left;
+}
+
+/* Contenedor de la foto para poner el sello encima */
+.marco {
+  position: relative;
+}
+
+/* "ULTIMA PIEZA" encima de la foto */
+.sello {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  padding: 4px 8px;
+  background: var(--color-blanco);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--color-negro);
+}
+
+/* Botones de talla */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.chip {
+  padding: 4px 10px;
+  border: 1px solid #D4D4D4;
+  background: var(--color-blanco);
+  font-size: 11px;
+  color: var(--color-negro);
+}
+
+.chip.sel {
+  background: var(--color-negro);
+  border-color: var(--color-negro);
+  color: var(--color-blanco);
+}
+
+/* Talla agotada: tachada */
+.chip:disabled {
+  background: var(--color-fondo-gris);
+  border-color: #E5E5E5;
+  color: #BDBDBD;
+  text-decoration: line-through;
+  cursor: not-allowed;
+}
+
+/* Circulos de color */
+.color {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid #CCC;
+}
+
+.color.sel {
+  outline: 1.5px solid var(--color-negro);
+  outline-offset: 2px;
+}
+
+.existencia {
+  margin: 10px 0 14px;
+  font-size: 12px;
+  color: var(--color-gris);
+}
+
+/* "Solo queda 1" en amarillo */
+.existencia.poca {
+  color: var(--color-alerta);
+}
+
+/* Botones TODO, VESTIDOS, BLUSAS... */
+.filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 20px 0 32px;
+}
+
+.filtros button {
+  padding: 8px 16px;
+  border: 1px solid #D4D4D4;
+  font-size: 12px;
+  letter-spacing: .06em;
+}
+
+.filtros button.sel {
+  background: var(--color-negro);
+  border-color: var(--color-negro);
+  color: var(--color-blanco);
+}
+
+/* Aviso negro flotante: "Agregaste a tu bolsa" */
+.toast {
+  position: fixed;
+  top: 128px;
+  right: 40px;
+  z-index: 10;
+  width: 360px;
+  display: grid;
+  grid-template-columns: 48px 1fr;
+  gap: 14px;
+  padding: 16px 18px;
+  background: var(--color-negro);
+  color: var(--color-blanco);
+  font-size: 13px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, .18);
+}
+
+.toast .foto {
+  height: 60px;
+}
+
+.toast small {
+  display: block;
+  color: #BDBDBD;
+}
+
+.toast a {
+  display: inline-block;
+  margin-top: 6px;
+  font-size: 11px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  text-decoration: underline;
+  color: var(--color-blanco);
+}
+
+
+/* ========== 14. Tablas y pestanas (Mis pedidos y panel de la boutique) ========== */
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+th {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--color-negro);
+  text-align: left;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--color-gris);
+}
+
+td {
+  padding: 16px 14px;
+  border-bottom: 1px solid var(--color-linea);
+  vertical-align: middle;
+  color: var(--color-negro);
+}
+
+.tabs {
+  display: flex;
+  gap: 28px;
+  margin: 8px 0 32px;
+  border-bottom: 1px solid var(--color-linea);
+}
+
+.tabs button {
+  padding: 12px 0;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--color-gris);
+}
+
+.tabs button.sel {
+  color: var(--color-negro);
+  border-bottom: 2px solid var(--color-negro);
+}
+
+/* Numerito morado en la pestana */
+.tabs i {
+  margin-left: 6px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--color-morado);
+  color: var(--color-blanco);
+  font-style: normal;
+  font-size: 10px;
+}
+
+
+/* ========== 15. Pie (lo pinta plantilla.js) ========== */
+
+.pie {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 28px 40px;
+  border-top: 1px solid var(--color-linea);
+  font-size: 11px;
+  color: var(--color-gris);
+}
+
+.pie b {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .12em;
+  color: var(--color-negro);
+}
+
+.pie nav {
+  display: flex;
+  gap: 24px;
+}
+
+
+/* ========== 16. Celular y tablet ========== */
+
+/* Pantallas de hasta 900px: una sola columna */
+@media (max-width: 900px) {
+  main {
+    padding: 32px 16px 48px;
+  }
+
+  .barra,
+  .pasos,
+  .pie {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .barra,
+  .iconos {
+    gap: 12px;
+  }
+
+  .nav,
+  .pie nav {
+    display: none;
+  }
+
+  .pasos {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+
+  .pasos li + li::before {
+    margin: 0 8px;
+  }
+
+  .dos {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+
+  .lado {
+    border-left: 0;
+    padding-left: 0;
+  }
+
+  .rejilla,
+  .rejilla3 {
+    grid-template-columns: 1fr;
+  }
+
+  .catalogo {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  .acciones {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .acciones .btn {
+    width: 100%;
+  }
+
+  .datos {
+    grid-template-columns: 1fr;
+    row-gap: 2px;
+  }
+
+  .datos dd {
+    margin-bottom: 10px;
+  }
+
+  .toast {
+    left: 16px;
+    right: 16px;
+    width: auto;
+  }
+
+  table {
+    display: block;
+    overflow-x: auto;
+  }
+
+  h1 {
+    font-size: 28px;
+  }
+}
+
+/* Celulares chicos */
+@media (max-width: 560px) {
+  .catalogo {
+    grid-template-columns: 1fr;
+  }
+
+  .sesion small,
+  .logo small {
+    display: none;
+  }
+
+  .pasos ol {
+    font-size: 10px;
+  }
+}
