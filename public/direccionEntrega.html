@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Entrega · Lili's Boutique</title>
+  <link rel="stylesheet" href="css/estilos.css">
+  <script src="js/api.js" defer></script>
+  <script src="js/plantilla.js" defer></script>
+  <script src="js/direccionEntrega.js" defer></script>
+</head>
+<!-- Pasos 7-12 del CU Realizar Pedido, flujos 2.2.2 y 2.2.8 -->
+<body data-paso="2">
+<main>
+  <div class="dos">
+    <div>
+      <h1>Entrega</h1>
+      <p class="sub">Solo entregamos dentro de Cd. Obregón. También puedes recoger tu pedido en la boutique.</p>
+      <div id="avisos"></div>
+
+      <p class="rotulo titulo-bloque">Método de entrega</p>
+      <label class="opcion">
+        <input type="radio" name="metodo" value="DOMICILIO" checked>
+        <span class="radio"></span>
+        <span class="txt"><b>Envío a domicilio</b><small>Lo lleva nuestra repartidora a tu dirección</small></span>
+        <span class="der-op">Según zona</span>
+      </label>
+      <label class="opcion">
+        <input type="radio" name="metodo" value="RECOGER_EN_BOUTIQUE">
+        <span class="radio"></span>
+        <span class="txt"><b>Recoger en boutique</b><small>Centro de Cd. Obregón · te avisamos cuando esté listo</small></span>
+        <span class="der-op">GRATIS</span>
+      </label>
+
+      <section id="seccion-domicilio">
+        <div id="bloque-guardadas" class="bloque oculto">
+          <p class="rotulo titulo-bloque">Dirección de entrega</p>
+          <div id="lista-direcciones"></div>
+          <button type="button" class="enlace sub-r" id="btn-nueva">+ Agregar otra dirección</button>
+        </div>
+
+        <form id="form-nueva" class="bloque oculto" novalidate>
+          <p class="rotulo titulo-bloque">Nueva dirección</p>
+          <div class="rejilla3">
+            <div class="campo"><label for="calle">Calle *</label><input id="calle" maxlength="150" autocomplete="address-line1"></div>
+            <div class="campo"><label for="numero">Número *</label><input id="numero" maxlength="20"></div>
+            <div class="campo"><label for="colonia">Colonia *</label><input id="colonia" maxlength="100"></div>
+          </div>
+          <div class="campo" id="campo-zona">
+            <label for="zona">Zona de envío *</label>
+            <select id="zona"></select>
+            <p class="ayuda" id="ayuda-zona">El costo del envío depende de la zona.</p>
+          </div>
+          <div class="campo"><label for="referencias">Referencias</label><input id="referencias" maxlength="255" placeholder="Color de la casa, entre qué calles…"></div>
+          <button type="button" class="enlace sub-r oculto" id="btn-guardadas">Usar una dirección guardada</button>
+        </form>
+      </section>
+
+      <section id="seccion-boutique" class="oculto">
+        <div class="bloque caja lila caja-icono">
+          <div class="icono-morado" id="icono-tienda"></div>
+          <div>
+            <h3>Lili's Boutique</h3>
+            <p class="meta">Centro de Cd. Obregón, Sonora</p>
+            <p class="nota">Te enviamos un correo cuando tu pedido esté listo. Si eliges pagar en la boutique, lleva tu folio de pago.</p>
+          </div>
+        </div>
+      </section>
+
+      <div class="acciones">
+        <a class="enlace" href="bolsaCompra.html" id="volver"></a>
+        <button type="button" class="btn" id="btn-continuar"></button>
+      </div>
+    </div>
+
+    <aside class="lado">
+      <div class="cabeza"><h2>Resumen de Compra</h2><span class="rotulo" id="num-prendas"></span></div>
+      <div id="resumen-prendas"></div>
+      <div class="totales">
+        <div class="fila"><span>Subtotal</span><span class="mono" id="subtotal">—</span></div>
+        <div class="fila" id="fila-envio"><span>Envío</span><span class="meta">Elige una dirección</span></div>
+      </div>
+      <div class="total"><strong>TOTAL</strong><span id="total">—</span></div>
+    </aside>
+  </div>
+</main>
+</body>
+</html>
