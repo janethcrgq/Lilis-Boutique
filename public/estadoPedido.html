@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tu pedido · Lili's Boutique</title>
+  <link rel="stylesheet" href="css/estilos.css">
+  <script src="js/api.js" defer></script>
+  <script src="js/plantilla.js" defer></script>
+  <script src="js/tarjeta.js" defer></script>
+  <script src="js/estadoPedido.js" defer></script>
+</head>
+
+<body>
+<main>
+  <div id="avisos"></div>
+  <p class="meta" id="cargando">Cargando tu pedido…</p>
+  <div id="vista"></div>
+</main>
+
+
+// 06-A Pagado 
+<template id="t-pagado">
+  <div class="dos">
+    <div>
+      <div class="circulo ok mediano" data-icono="check"></div>
+      <h1>¡Gracias, <span data-campo="nombre"></span>! Tu pedido está pagado.</h1>
+      <p class="sub">Te enviamos la confirmación a <span data-campo="correo"></span>.</p>
+      <div class="caja">
+        <dl class="datos">
+          <dt>Pedido</dt><dd class="mono" data-campo="numPedido"></dd>
+          <dt>Estado</dt><dd><span class="estado pagado" data-campo="estado"></span></dd>
+          <dt>Fecha</dt><dd data-campo="fechaPago"></dd>
+          <dt>Pago</dt><dd data-campo="pago"></dd>
+          <dt>Entrega</dt><dd data-campo="entrega"></dd>
+        </dl>
+      </div>
+      <p class="meta" data-campo="aviso"></p>
+      <div class="acciones">
+        <a class="enlace" href="misPedidos.html">Ver mis pedidos</a>
+        <a class="btn" href="catalogo.html">Seguir comprando</a>
+      </div>
+    </div>
+    <aside class="lado" data-lado="pagado"></aside>
+  </div>
+</template>
+
+
+//Tarjeta rechazada (2.2.5) 
+<template id="t-rechazada">
+  <div class="dos">
+    <div>
+      <div class="circulo error mediano" data-icono="x"></div>
+      <h1 data-campo="titulo">Tu banco rechazó el pago</h1>
+      <p class="sub" data-campo="detalle"></p>
+
+      <form id="form-tarjeta" novalidate>
+        <p class="rotulo titulo-bloque">Intenta con otra tarjeta</p>
+        <div class="campo">
+          <label for="numero">Número de tarjeta *</label>
+          <input id="numero" class="mono" inputmode="numeric" autocomplete="cc-number" maxlength="19" placeholder="0000 0000 0000 0000">
+        </div>
+        <div class="rejilla">
+          <div class="campo">
+            <label for="vencimiento">Vencimiento (MM/AA) *</label>
+            <input id="vencimiento" class="mono" inputmode="numeric" autocomplete="cc-exp" maxlength="7" placeholder="MM / AA">
+          </div>
+          <div class="campo">
+            <label for="cvv">CVV *</label>
+            <input id="cvv" class="mono" type="password" inputmode="numeric" autocomplete="cc-csc" maxlength="4" placeholder="•••">
+          </div>
+        </div>
+        <div class="campo">
+          <label for="titular">Nombre del titular *</label>
+          <input id="titular" autocomplete="cc-name" maxlength="80" placeholder="Como aparece en la tarjeta">
+        </div>
+
+        <div class="acciones">
+          <button type="button" class="enlace sub-r" id="btn-transferencia">Pagar con transferencia</button>
+          <button type="submit" class="btn" id="btn-reintentar"></button>
+        </div>
+      </form>
+    </div>
+    <aside class="lado" data-lado="pendiente"></aside>
+  </div>
+</template>
+
+
+// Pasarela caida 
+<template id="t-sin-conexion">
+  <div class="centrada">
+    <div class="circulo error" data-icono="alerta"></div>
+    <h1>No pudimos procesar tu pago en este momento</h1>
+    <p class="sub" data-campo="detalle"></p>
+    <div class="botones">
+      <button type="button" class="btn" id="btn-reintentar-token">Reintentar pago</button>
+      <button type="button" class="btn sec" id="btn-cambiar">Cambiar forma de pago</button>
+    </div>
+
+    // Al presionar "Cambiar forma de pago"
+    <div id="cambiar-forma" class="bloque izquierda oculto">
+      <p class="rotulo titulo-bloque">Elige cómo quieres pagar</p>
+      <label class="opcion">
+        <input type="radio" name="forma" value="TARJETA">
+        <span class="radio"></span>
+        <span class="txt"><b>Otra tarjeta</b><small>Captura los datos de otra tarjeta</small></span>
+      </label>
+      <label class="opcion">
+        <input type="radio" name="forma" value="TRANSFERENCIA" checked>
+        <span class="radio"></span>
+        <span class="txt"><b>Transferencia</b><small>Te damos la CLABE y subes tu comprobante</small></span>
+      </label>
+      <label class="opcion">
+        <input type="radio" name="forma" value="CONTRA_ENTREGA">
+        <span class="radio"></span>
+        <span class="txt"><b>Pagar en la boutique</b><small data-campo="ayudaContraEntrega">Con tarjeta o efectivo al recoger tu pedido</small></span>
+      </label>
+      <div class="acciones">
+        <span></span>
+        <button type="button" class="btn" id="btn-confirmar-forma">Continuar</button>
+      </div>
+    </div>
+  </div>
+</template>
+
+
+// 06-D Transferencia
+<template id="t-transferencia">
+  <div class="dos">
+    <div>
+      <div class="circulo info mediano" data-icono="banco"></div>
+      <h1>Tu pedido está confirmado</h1>
+      <p class="sub">Haz la transferencia antes del <b data-campo="limite"></b> o el pedido se cancelará.</p>
+
+      <div class="caja lila">
+        <dl class="datos">
+          <dt>Banco</dt><dd data-campo="banco"></dd>
+          <dt>CLABE</dt><dd class="mono" data-campo="clabe"></dd>
+          <dt>Beneficiaria</dt><dd>Lili's Boutique</dd>
+          <dt>Monto exacto</dt><dd class="mono" data-campo="monto"></dd>
+          <dt>Concepto</dt><dd class="mono" data-campo="concepto"></dd>
+        </dl>
+      </div>
+
+      <form id="form-comprobante" novalidate>
+        <p class="rotulo titulo-bloque bloque">Ya transferí</p>
+        <div class="campo" id="campo-referencia">
+          <label for="referencia">Número de referencia o clave de rastreo *</label>
+          <input id="referencia" class="mono" maxlength="50" autocomplete="off">
+          <p class="ayuda oculto" id="ayuda-referencia">Escribe el número que te dio tu banco.</p>
+        </div>
+
+        <label class="subir" id="zona-subir">
+          <input type="file" id="archivo" class="oculto" accept="image/jpeg,image/png,image/webp,application/pdf">
+          <span data-icono="subir"></span>
+          <b>Sube tu comprobante</b>
+          <span class="meta">Imagen o PDF, máximo 5 MB</span>
+        </label>
+        <div class="archivo oculto" id="archivo-elegido">
+          <span class="ext" id="archivo-ext"></span>
+          <span id="archivo-nombre"></span>
+          <button type="button" class="enlace sub-r" id="btn-otro-archivo">Cambiar</button>
+        </div>
+
+        <div class="acciones">
+          <a class="enlace sub-r" href="misPedidos.html">Lo subo después desde Mis pedidos</a>
+          <button type="submit" class="btn" id="btn-enviar">Enviar comprobante</button>
+        </div>
+      </form>
+    </div>
+    <aside class="lado" data-lado="transferencia"></aside>
+  </div>
+</template>
+
+
+// Comprobante enviado
+<template id="t-comprobante">
+  <div class="centrada">
+    <div class="circulo ok" data-icono="check"></div>
+    <h1>Recibimos tu comprobante</h1>
+    <p class="sub">La boutique lo revisará y te avisaremos por correo a <span data-campo="correo"></span> cuando tu pago quede aprobado.</p>
+    <div class="caja">
+      <dl class="datos">
+        <dt>Pedido</dt><dd class="mono" data-campo="numPedido"></dd>
+        <dt>Estado del pago</dt><dd><span class="estado revision">En revisión</span></dd>
+        <dt>Referencia</dt><dd class="mono" data-campo="referencia"></dd>
+        <dt>Comprobante</dt><dd><a target="_blank" rel="noopener" data-campo="comprobante"></a></dd>
+      </dl>
+    </div>
+    <div class="botones"><a class="btn sec" href="misPedidos.html">Ver mis pedidos</a></div>
+  </div>
+</template>
+
+
+// Folio de contra entrega 
+<template id="t-folio">
+  <div class="centrada">
+    <div class="circulo info" data-icono="tienda"></div>
+    <h1>Tu pedido está apartado en la boutique</h1>
+    <p class="sub">Presenta este folio al recoger tu pedido y paga con tarjeta o efectivo.</p>
+    <div class="caja lila centro">
+      <p class="rotulo">Folio de pago</p>
+      <p class="folio" data-campo="folio"></p>
+      <p class="meta" data-campo="detalle"></p>
+    </div>
+    <div class="aviso alerta">
+      <span data-icono="reloj"></span>
+      <div><b data-campo="limite"></b><p data-campo="consecuencia"></p></div>
+    </div>
+    <div class="botones"><a class="btn sec" href="misPedidos.html">Ver mis pedidos</a></div>
+  </div>
+</template>
+
+
+// Cancelado
+<template id="t-cancelado">
+  <div class="dos">
+    <div>
+      <div class="circulo error mediano" data-icono="x"></div>
+      <h1>Tu pedido se canceló</h1>
+      <p class="sub">No recibimos el pago antes de la fecha límite, así que liberamos las prendas. Te lo avisamos por correo a <span data-campo="correo"></span>.</p>
+      <div class="caja">
+        <dl class="datos">
+          <dt>Pedido</dt><dd class="mono" data-campo="numPedido"></dd>
+          <dt>Estado</dt><dd><span class="estado cancelado">Cancelado</span></dd>
+          <dt>Fecha del pedido</dt><dd data-campo="fecha"></dd>
+          <dt>Fecha límite de pago</dt><dd data-campo="limite"></dd>
+          <dt>Forma de pago</dt><dd data-campo="forma"></dd>
+        </dl>
+      </div>
+      <div class="acciones">
+        <a class="enlace" href="misPedidos.html">Ver mis pedidos</a>
+        <a class="btn" href="catalogo.html">Volver a la colección</a>
+      </div>
+    </div>
+    <aside class="lado" data-lado="cancelado"></aside>
+  </div>
+</template>
+</body>
+</html>

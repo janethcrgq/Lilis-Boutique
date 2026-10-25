@@ -1,6 +1,8 @@
 import 'dotenv/config';
+import { mkdir, writeFile } from 'fs/promises';
+import { join } from 'path';
 import { PrismaClient } from '@prisma/client';
-
+import type { EstadoPago, FormaPago, Prisma } from '@prisma/client';
 // Borra todo y carga datos de ejemplo de la boutique.
 //   npm run seed
 const prisma = new PrismaClient();
@@ -137,6 +139,7 @@ async function main() {
     },
   });
 
+  
   const clientas = [
     {
       nombre: 'Maria',
@@ -182,12 +185,240 @@ async function main() {
     }
   }
 
+  await crearPedidosDePrueba();
+
   console.log(
-    'Datos de ejemplo cargados: 3 zonas, 4 productos, 7 variantes, 5 usuarios.',
+    'Datos de ejemplo cargados: 3 zonas, 4 productos, 7 variantes, 5 usuarios y 6 pedidos.',
   );
 }
 
+
+const HORA = 60 * 60 * 1000;
+
+interface PagoDePrueba {
+  metodo: FormaPago;
+  estadoPago: EstadoPago;
+  numeroReferencia?: string;
+  comprobanteURL?: string;
+  respuestaPasarela?: string;
+}
+
+interface PedidoDePrueba {
+  correo: string;
+  prendas: { nombre: string; color: string; cantidad: number }[];
+  metodoEntrega: 'DOMICILIO' | 'RECOGER_EN_BOUTIQUE';
+  estadoPedido: 'PENDIENTE_DE_PAGO' | 'PAGADO' | 'CANCELADO';
+  hace: number; 
+  pagos: PagoDePrueba[]; 
+}
+
+
+async function crearPedido(datos: PedidoDePrueba): Promise<number> {
+  const usuario = await prisma.usuario.findUniqueOrThrow({
+    where: { correo: datos.correo },
+  });
+  const direccion =
+    datos.metodoEntrega === 'DOMICILIO'
+      ? await prisma.direccion.findFirstOrThrow({
+          where: { idCliente: usuario.idUsuario },
+          include: { zona: true },
+        })
+      : null;
+
+  const detalles: Prisma.DetallePedidoCreateManyPedidoInput[] = [];
+  let subtotal = 0;
+  for (const p of datos.prendas) {
+    const variante = await prisma.varianteProducto.findFirstOrThrow({
+      where: { producto: { nombre: p.nombre }, color: p.color },
+      include: { producto: true },
+    });
+    const precio = Number(variante.producto.precio);
+    subtotal += precio * p.cantidad;
+    detalles.push({
+      idVariante: variante.idVariante,
+      cantidad: p.cantidad,
+      precioUnitario: precio,
+    });
+  }
+  const costoEnvio = direccion ? Number(direccion.zona.costoEnvio) : 0;
+  const fecha = new Date(Date.now() - datos.hace * HORA);
+
+  const pedido = await prisma.pedido.create({
+    data: {
+      idCliente: usuario.idUsuario,
+      fecha,
+      subtotal,
+      total: subtotal + costoEnvio,
+      estadoPedido: datos.estadoPedido,
+      metodoEntrega: datos.metodoEntrega,
+      fechaLimitePago: new Date(fecha.getTime() + 48 * HORA),
+      detalles: { createMany: { data: detalles } },
+    },
+  });
+  await prisma.pedido.update({
+    where: { idPedido: pedido.idPedido },
+    data: { numPedido: `LB-${String(pedido.idPedido).padStart(6, '0')}` },
+  });
+
+  if (direccion) {
+    await prisma.envio.create({
+      data: {
+        idPedido: pedido.idPedido,
+        idDireccion: direccion.idDireccion,
+        costoEnvio,
+      },
+    });
+  }
+  if (datos.estadoPedido !== 'CANCELADO') {
+    for (const d of detalles) {
+      await prisma.varianteProducto.update({
+        where: { idVariante: d.idVariante },
+        data: { stock: { decrement: d.cantidad } },
+      });
+    }
+  }
+
+  for (const p of datos.pagos) {
+    const pago = await prisma.pago.create({
+      data: {
+        idPedido: pedido.idPedido,
+        monto: subtotal + costoEnvio,
+        metodo: p.metodo,
+        estadoPago: p.estadoPago,
+      },
+    });
+    if (p.metodo === 'TARJETA') {
+      await prisma.pagoTarjeta.create({
+        data: {
+          idPago: pago.idPago,
+          idTransaccion: p.respuestaPasarela ? `SIM-${pago.idPago}` : null,
+          respuestaPasarela: p.respuestaPasarela ?? null,
+        },
+      });
+    }
+    if (p.metodo === 'TRANSFERENCIA') {
+      await prisma.pagoTransferencia.create({
+        data: {
+          idPago: pago.idPago,
+          numeroReferencia: p.numeroReferencia ?? null,
+          comprobanteURL: p.comprobanteURL ?? null,
+        },
+      });
+    }
+    if (p.metodo === 'CONTRA_ENTREGA') {
+      await prisma.pagoContraEntrega.create({
+        data: {
+          idPago: pago.idPago,
+          folio: `CE-${String(pago.idPago).padStart(6, '0')}`,
+        },
+      });
+    }
+  }
+  return pedido.idPedido;
+}
+
+async function crearPedidosDePrueba() {
+  const carpeta = join(process.cwd(), 'uploads', 'comprobantes');
+  await mkdir(carpeta, { recursive: true });
+  await writeFile(join(carpeta, 'comprobante-prueba.pdf'), PDF_DE_PRUEBA);
+
+  await crearPedido({
+    correo: 'maria@correo.com',
+    prendas: [
+      { nombre: 'Vestido midi floral', color: 'Negro', cantidad: 1 },
+      { nombre: 'Blusa de lino', color: 'Blanco', cantidad: 2 },
+      { nombre: 'Bolsa de mano', color: 'Negro', cantidad: 1 },
+    ],
+    metodoEntrega: 'DOMICILIO',
+    estadoPedido: 'PAGADO',
+    hace: 2,
+    pagos: [
+      {
+        metodo: 'TARJETA',
+        estadoPago: 'APROBADO',
+        respuestaPasarela: 'Cobro aprobado',
+      },
+    ],
+  });
+
+  await crearPedido({
+    correo: 'maria@correo.com',
+    prendas: [{ nombre: 'Vestido midi floral', color: 'Rojo', cantidad: 1 }],
+    metodoEntrega: 'DOMICILIO',
+    estadoPedido: 'PENDIENTE_DE_PAGO',
+    hace: 1,
+    pagos: [
+      {
+        metodo: 'TARJETA',
+        estadoPago: 'RECHAZADO',
+        respuestaPasarela: 'Fondos insuficientes',
+      },
+      { metodo: 'TARJETA', estadoPago: 'PENDIENTE' },
+    ],
+  });
+
+  await crearPedido({
+    correo: 'sofia@correo.com',
+    prendas: [
+      { nombre: 'Blusa de lino', color: 'Beige', cantidad: 1 },
+      { nombre: 'Sandalia trenzada', color: 'Negro', cantidad: 1 },
+    ],
+    metodoEntrega: 'DOMICILIO',
+    estadoPedido: 'PENDIENTE_DE_PAGO',
+    hace: 1,
+    pagos: [{ metodo: 'TRANSFERENCIA', estadoPago: 'PENDIENTE' }],
+  });
+
+  await crearPedido({
+    correo: 'sofia@correo.com',
+    prendas: [{ nombre: 'Blusa de lino', color: 'Blanco', cantidad: 1 }],
+    metodoEntrega: 'DOMICILIO',
+    estadoPedido: 'PENDIENTE_DE_PAGO',
+    hace: 3,
+    pagos: [
+      {
+        metodo: 'TRANSFERENCIA',
+        estadoPago: 'PENDIENTE',
+        numeroReferencia: 'MBAN01002610230091',
+        comprobanteURL: '/uploads/comprobantes/comprobante-prueba.pdf',
+      },
+    ],
+  });
+
+  await crearPedido({
+    correo: 'daniela@correo.com',
+    prendas: [{ nombre: 'Vestido midi floral', color: 'Negro', cantidad: 1 }],
+    metodoEntrega: 'RECOGER_EN_BOUTIQUE',
+    estadoPedido: 'PENDIENTE_DE_PAGO',
+    hace: 1,
+    pagos: [{ metodo: 'CONTRA_ENTREGA', estadoPago: 'PENDIENTE' }],
+  });
+
+  await crearPedido({
+    correo: 'daniela@correo.com',
+    prendas: [{ nombre: 'Sandalia trenzada', color: 'Cafe', cantidad: 1 }],
+    metodoEntrega: 'RECOGER_EN_BOUTIQUE',
+    estadoPedido: 'CANCELADO',
+    hace: 72,
+    pagos: [{ metodo: 'TRANSFERENCIA', estadoPago: 'CANCELADO' }],
+  });
+}
+
+const PDF_DE_PRUEBA = `%PDF-1.4
+1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj
+2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj
+3 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 300 120]/Contents 4 0 R/Resources<</Font<</F1 5 0 R>>>>>>endobj
+4 0 obj<</Length 52>>stream
+BT /F1 14 Tf 30 60 Td (Comprobante de prueba) Tj ET
+endstream endobj
+5 0 obj<</Type/Font/Subtype/Type1/BaseFont/Helvetica>>endobj
+trailer<</Root 1 0 R>>
+%%EOF
+`;
+
+
 main()
+
   .catch((error) => {
     console.error(error);
     process.exitCode = 1;

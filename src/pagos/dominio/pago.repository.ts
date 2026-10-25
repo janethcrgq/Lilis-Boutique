@@ -1,4 +1,4 @@
-import { DatosTarjeta, FormaPago, Pago } from './entidades';
+import { DatosTarjeta, FormaPago, Pago, ResumenDelPedido } from './entidades';
 
 export interface PagoRepository {
   buscarPorId(idPago: number): Promise<Pago | null>;
@@ -14,4 +14,7 @@ export interface PagoRepository {
     numeroReferencia: string,
     comprobanteURL: string,
   ): Promise<Pago>;
+  listarTransferenciasPendientes(): Promise<Pago[]>;
+  buscarUltimo(idPedido: number): Promise<Pago | null>;
+  buscarResumen(idPedido: number): Promise<ResumenDelPedido | null>;
 }

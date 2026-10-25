@@ -44,3 +44,9 @@ export class SinComprobanteError extends DatoInvalidoError {
     super('La transferencia todavia no tiene comprobante');
   }
 }
+
+export class PedidoNoEncontradoError extends NoEncontradoError {
+  constructor() {
+    super('No encontramos ese pedido');
+  }
+}

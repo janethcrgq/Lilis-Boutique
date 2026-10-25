@@ -1389,3 +1389,63 @@ td {
     font-size: 10px;
   }
 }
+
+
+.circulo.mediano {
+  width: 86px;
+  height: 86px;
+  margin-bottom: 32px;
+}
+
+.centrada {
+  max-width: 890px;
+  margin: 72px auto 0;
+  text-align: center;
+}
+
+.centrada .circulo {
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 36px;
+}
+
+.centrada h1 {
+  margin-bottom: 20px;
+}
+
+.centrada .caja:not(.centro),
+.centrada .aviso,
+.centrada .izquierda {
+  text-align: left;
+}
+
+.botones {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.botones .btn {
+  width: 344px;
+}
+
+.total span.tachado {
+  color: var(--color-gris);
+  text-decoration: line-through;
+}
+
+@media (max-width: 900px) {
+  .centrada {
+    margin-top: 24px;
+  }
+
+  .centrada .circulo {
+    width: 84px;
+    height: 84px;
+  }
+
+  .botones .btn {
+    width: 100%;
+  }
+}

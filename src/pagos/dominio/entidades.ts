@@ -39,3 +39,37 @@ export interface InstruccionesDePago {
   concepto?: string;
   folio?: string;
 }
+
+
+export interface PrendaDelPedido {
+  nombre: string;
+  categoria: string;
+  talla: string;
+  color: string;
+  cantidad: number;
+  precioUnitario: number;
+  imagenURL: string | null;
+}
+
+export interface ResumenDelPedido {
+  idPedido: number;
+  idCliente: number;
+  numPedido: string | null;
+  estadoPedido: string;
+  fecha: Date;
+  fechaLimitePago: Date | null;
+  subtotal: number;
+  total: number;
+  metodoEntrega: string | null;
+  costoEnvio: number;
+  zona: string | null;
+  direccion: string | null;
+  nombreClienta: string;
+  correoClienta: string;
+  prendas: PrendaDelPedido[];
+}
+
+export interface EstadoDelPago extends ResumenDelPedido {
+  pago: Pago | null;
+  instrucciones: InstruccionesDePago | null;
+}

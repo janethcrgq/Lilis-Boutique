@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import { DatosTarjeta, FormaPago, Pago } from '../dominio/entidades';
+import { DatosTarjeta, FormaPago, Pago, ResumenDelPedido } from '../dominio/entidades';
 import { PagoRepository } from '../dominio/pago.repository';
 import { PrismaService } from '../../prisma/prisma.service';
 import { crearPago } from './crear-pago';
@@ -12,6 +12,20 @@ const completo = {
 } satisfies Prisma.PagoInclude;
 
 type PagoCompleto = Prisma.PagoGetPayload<{ include: typeof completo }>;
+
+const paraResumen = {
+  cliente: { include: { usuario: true } },
+  envio: { include: { direccion: { include: { zona: true } } } },
+  detalles: {
+    include: {
+      variante: { include: { producto: { include: { categoria: true } } } },
+    },
+  },
+} satisfies Prisma.PedidoInclude;
+
+type PedidoParaResumen = Prisma.PedidoGetPayload<{
+  include: typeof paraResumen;
+}>;
 
 function aPago(pago: PagoCompleto): Pago {
   return {
@@ -28,6 +42,37 @@ function aPago(pago: PagoCompleto): Pago {
     folio: pago.pagoContraEntrega?.folio ?? null,
     numeroReferencia: pago.pagoTransferencia?.numeroReferencia ?? null,
     comprobanteURL: pago.pagoTransferencia?.comprobanteURL ?? null,
+  };
+}
+
+function aResumen(pedido: PedidoParaResumen): ResumenDelPedido {
+  const direccion = pedido.envio?.direccion;
+  return {
+    idPedido: pedido.idPedido,
+    idCliente: pedido.idCliente,
+    numPedido: pedido.numPedido,
+    estadoPedido: pedido.estadoPedido,
+    fecha: pedido.fecha,
+    fechaLimitePago: pedido.fechaLimitePago,
+    subtotal: Number(pedido.subtotal),
+    total: Number(pedido.total),
+    metodoEntrega: pedido.metodoEntrega,
+    costoEnvio: pedido.envio ? Number(pedido.envio.costoEnvio) : 0,
+    zona: direccion?.zona.nombre ?? null,
+    direccion: direccion
+      ? `${direccion.calle} ${direccion.numeroCasa}, Col. ${direccion.colonia}`
+      : null,
+    nombreClienta: pedido.cliente.usuario.nombre,
+    correoClienta: pedido.cliente.usuario.correo,
+    prendas: pedido.detalles.map((d) => ({
+      nombre: d.variante.producto.nombre,
+      categoria: d.variante.producto.categoria.nombre,
+      talla: d.variante.talla,
+      color: d.variante.color,
+      cantidad: d.cantidad,
+      precioUnitario: Number(d.precioUnitario),
+      imagenURL: d.variante.imagenURL,
+    })),
   };
 }
 
@@ -71,6 +116,25 @@ export class PagoPrismaRepository implements PagoRepository {
     });
     return pagos.map(aPago);
   }
+
+  async buscarUltimo(idPedido: number): Promise<Pago | null> {
+    const pago = await this.prisma.pago.findFirst({
+      where: { idPedido },
+      orderBy: { idPago: 'desc' },
+      include: completo,
+    });
+    return pago ? aPago(pago) : null;
+  }
+
+  async buscarResumen(idPedido: number): Promise<ResumenDelPedido | null> {
+    const pedido = await this.prisma.pedido.findUnique({
+      where: { idPedido },
+      include: paraResumen,
+    });
+    return pedido ? aResumen(pedido) : null;
+  }
+
+  
 
   async crear(
     idPedido: number,

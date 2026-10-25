@@ -4,6 +4,7 @@ import type {
   InstruccionesDePago,
   Pago,
   ResultadoPasarela,
+  EstadoDelPago
 } from './dominio/entidades';
 import type { PagoRepository } from './dominio/pago.repository';
 import type { PasarelaPagos } from './dominio/pasarela-pagos';
@@ -13,6 +14,7 @@ import {
   PagoNoEncontradoError,
   PagoRechazadoError,
   PasarelaNoDisponibleError,
+  PedidoNoEncontradoError,
   SinComprobanteError,
 } from './dominio/errores';
 import { CambiarFormaPagoDto } from './dto/cambiar-forma-pago.dto';
@@ -21,6 +23,11 @@ import { SubirComprobanteDto } from './dto/subir-comprobante.dto';
 import { PAGO_REPOSITORY, PASARELA_PAGOS } from './pagos.tokens';
 import type { Notificador } from '../notificaciones/dominio/notificador';
 import { NOTIFICADOR } from '../notificaciones/notificaciones.tokens';
+
+
+function normalizarFolio(folio: string): string {
+  return folio.trim().toUpperCase();
+}
 
 @Injectable()
 export class PagosService {
@@ -39,6 +46,32 @@ export class PagosService {
       throw new PagoNoEncontradoError();
     }
     return this.instrucciones(pago);
+  }
+
+
+  async estadoDelPago(
+    idCliente: number,
+    idPedido: number,
+  ): Promise<EstadoDelPago> {
+    const resumen = await this.repo.buscarResumen(idPedido);
+    if (
+      !resumen ||
+      resumen.idCliente !== idCliente ||
+      resumen.estadoPedido === 'EN_CARRITO'
+    ) {
+      throw new PedidoNoEncontradoError();
+    }
+
+    const pago = await this.repo.buscarUltimo(idPedido);
+    const esperaPago =
+      pago?.estadoPago === 'PENDIENTE' &&
+      resumen.estadoPedido === 'PENDIENTE_DE_PAGO';
+
+    return {
+      ...resumen,
+      pago,
+      instrucciones: pago && esperaPago ? this.instrucciones(pago) : null,
+    };
   }
 
   // Paso 19-21 del CU (y 2.2.5 / 2.2.7 cuando algo sale mal).
@@ -134,14 +167,14 @@ export class PagosService {
     return this.aprobar(pago);
   }
 
-  
+
   listarTransferenciasPendientes(): Promise<Pago[]> {
     return this.repo.listarTransferenciasPendientes();
   }
 
-  
+
   async buscarPorFolio(folio: string): Promise<Pago> {
-    const pago = await this.repo.buscarPorFolio(folio);
+    const pago = await this.repo.buscarPorFolio(normalizarFolio(folio));
     if (!pago || pago.estadoPago !== 'PENDIENTE') {
       throw new PagoNoEncontradoError();
     }
@@ -150,10 +183,7 @@ export class PagosService {
 
   // Lo hace la Vendedora cuando la clienta paga al recoger (2.2.4 paso 6).
   async cobrarEnBoutique(folio: string): Promise<Pago> {
-    const pago = await this.repo.buscarPorFolio(folio);
-    if (!pago || pago.estadoPago !== 'PENDIENTE') {
-      throw new PagoNoEncontradoError();
-    }
+    const pago = await this.buscarPorFolio(folio);
     return this.aprobar(pago);
   }
 

@@ -35,6 +35,14 @@ const MAXIMO_BYTES = 5 * 1024 * 1024; // 5 MB
 export class PagosController {
   constructor(private readonly pagos: PagosService) {}
 
+  @Get()
+  estado(
+    @ClienteActual() idCliente: number,
+    @Param('id', ParseIntPipe) idPedido: number,
+  ) {
+    return this.pagos.estadoDelPago(idCliente, idPedido);
+  }
+
   @Post('tarjeta')
   pagarConTarjeta(
     @ClienteActual() idCliente: number,
