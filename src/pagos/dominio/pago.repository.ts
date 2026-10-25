@@ -4,6 +4,7 @@ export interface PagoRepository {
   buscarPorId(idPago: number): Promise<Pago | null>;
   buscarPendiente(idPedido: number): Promise<Pago | null>;
   buscarPorFolio(folio: string): Promise<Pago | null>;
+  listarTransferenciasPendientes(): Promise<Pago[]>;
   crear(idPedido: number, metodo: FormaPago, monto: number): Promise<Pago>;
   aprobar(idPago: number, tarjeta?: DatosTarjeta): Promise<Pago>;
   rechazar(idPago: number, tarjeta: DatosTarjeta): Promise<Pago>;

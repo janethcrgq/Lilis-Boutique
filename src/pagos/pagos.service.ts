@@ -134,6 +134,20 @@ export class PagosService {
     return this.aprobar(pago);
   }
 
+  
+  listarTransferenciasPendientes(): Promise<Pago[]> {
+    return this.repo.listarTransferenciasPendientes();
+  }
+
+  
+  async buscarPorFolio(folio: string): Promise<Pago> {
+    const pago = await this.repo.buscarPorFolio(folio);
+    if (!pago || pago.estadoPago !== 'PENDIENTE') {
+      throw new PagoNoEncontradoError();
+    }
+    return pago;
+  }
+
   // Lo hace la Vendedora cuando la clienta paga al recoger (2.2.4 paso 6).
   async cobrarEnBoutique(folio: string): Promise<Pago> {
     const pago = await this.repo.buscarPorFolio(folio);

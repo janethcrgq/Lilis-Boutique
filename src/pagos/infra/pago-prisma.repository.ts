@@ -59,6 +59,19 @@ export class PagoPrismaRepository implements PagoRepository {
     return contraEntrega ? this.buscarPorId(contraEntrega.idPago) : null;
   }
 
+  async listarTransferenciasPendientes(): Promise<Pago[]> {
+    const pagos = await this.prisma.pago.findMany({
+      where: {
+        metodo: 'TRANSFERENCIA',
+        estadoPago: 'PENDIENTE',
+        pagoTransferencia: { is: { comprobanteURL: { not: null } } },
+      },
+      orderBy: { idPago: 'asc' },
+      include: completo,
+    });
+    return pagos.map(aPago);
+  }
+
   async crear(
     idPedido: number,
     metodo: FormaPago,

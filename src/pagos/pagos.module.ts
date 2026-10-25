@@ -4,9 +4,12 @@ import { PagosService } from './pagos.service';
 import { PagoPrismaRepository } from './infra/pago-prisma.repository';
 import { PasarelaSimulada } from './infra/pasarela-simulada';
 import { PAGO_REPOSITORY, PASARELA_PAGOS } from './pagos.tokens';
+import { PagosController } from './pagos.controller';
+import { BoutiqueController } from './boutique.controller';
 
 @Module({
   imports: [NotificacionesModule],
+  controllers: [PagosController, BoutiqueController],
   providers: [
     PagosService,
     {
