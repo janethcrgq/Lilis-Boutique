@@ -116,7 +116,7 @@ function pasos(paso) {
 function pie() {
   return `
   <footer class="pie"><b>LILI'S BOUTIQUE</b>
-    <nav><a href="misPedidos.html">Mis pedidos</a><a>Envíos y devoluciones</a><a>Privacidad</a><a>Términos</a></nav>
+    <nav><a href="misPedidos.html">Mis pedidos</a></nav>
     <span>© 2026 Lili's Boutique · Cd. Obregón, Sonora</span>
   </footer>`;
 }
