@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="es">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=1280">
+    <title>04 Confirmación del pedido - Lili's Boutique</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&family=Playfair+Display:wght@400;500&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="css/estilos.css">
+    <script src="js/api.js" defer></script>
+    <script src="js/plantilla.js" defer></script>
+    <script src="js/confirmacionPedido.js" defer></script>
+    <style>
+        .caja {
+            border: 1px solid var(--linea, #E7E7E7);
+            padding: 28px;
+            margin-bottom: 24px;
+        }
+
+        .caja.lila {
+            background: var(--info-bg, #F5F2FD);
+            border-color: var(--lila-2, #DED6F5);
+        }
+
+        .folio {
+            font: 500 40px var(--mono, monospace);
+            letter-spacing: .06em;
+            color: var(--tinta, #121212);
+            margin: 8px 0 16px;
+        }
+
+        .circulo {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            margin-bottom: 20px;
+        }
+
+        .circulo.ok {
+            background: var(--ok-bg, #EDF7F1);
+            color: var(--ok, #1F6B45);
+        }
+
+        .circulo.error {
+            background: var(--error-bg, #FDF1EF);
+            color: var(--error, #A8261B);
+        }
+
+        .datos {
+            display: grid;
+            grid-template-columns: 180px 1fr;
+            row-gap: 12px;
+            font-size: 14px;
+        }
+
+        .datos dt {
+            color: var(--gris, #727272);
+        }
+
+        .datos dd {
+            color: var(--tinta, #121212);
+            font-weight: 500;
+        }
+
+        .btn.cargando {
+            opacity: 0.7;
+            pointer-events: none;
+        }
+    </style>
+</head>
+
+<body data-paso="4">
+    <main>
+        <div id="avisos"></div>
+
+        <!-- VISTA 1: Resumen y Botón para Confirmar -->
+        <div class="dos" id="vista-resumen">
+            <div>
+                <h1>Resumen del Pedido</h1>
+                <p class="sub">Revisa los detalles antes de confirmar tu compra.</p>
+
+                <div class="cabeza">
+                    <h2>Prendas</h2>
+                    <span class="rotulo" id="resumen-cant-prendas">...</span>
+                </div>
+
+                <!-- Lista dinámica de prendas de la bolsa -->
+                <div id="lista-prendas"></div>
+
+                <!-- Resumen de entrega y forma de pago -->
+                <div class="rejilla" style="margin-top:32px; gap:0 40px">
+                    <div>
+                        <div class="cabeza" style="border:0; padding-bottom:8px">
+                            <span class="rotulo">Entrega</span>
+                            <a href="direccionEntrega.html" class="enlace sub-r">Modificar</a>
+                        </div>
+                        <p id="info-entrega-titulo"
+                            style="color:var(--tinta, #121212); font-weight:500; margin-bottom:4px;"></p>
+                        <p class="meta" id="info-entrega-detalle"></p>
+                    </div>
+
+                    <div style="border-left:1px solid var(--linea, #E7E7E7); padding-left:40px">
+                        <div class="cabeza" style="border:0; padding-bottom:8px">
+                            <span class="rotulo">Forma de pago</span>
+                            <a href="metodoPago.html" class="enlace sub-r">Modificar</a>
+                        </div>
+                        <p id="info-pago-titulo"
+                            style="color:var(--tinta, #121212); font-weight:500; display:flex; gap:8px; align-items:center; margin-bottom:4px;">
+                        </p>
+                        <p class="meta" id="info-pago-detalle"></p>
+                    </div>
+                </div>
+
+                <div class="acciones">
+                    <a href="metodoPago.html" class="enlace">
+                        <span id="ico-atras"></span> Volver al paso anterior
+                    </a>
+                    <span></span>
+                </div>
+            </div>
+
+            <!-- Cálculo lateral del costo -->
+            <aside class="lado">
+                <div class="cabeza">
+                    <h2>Cálculo de Compra</h2>
+                </div>
+                <div style="padding-top:12px">
+                    <div class="fila">
+                        <span>Subtotal (<span id="calc-cant">...</span>)</span>
+                        <span class="mono" id="calc-subtotal">$0.00</span>
+                    </div>
+                    <div class="fila" id="fila-envio">
+                        <span>Envío (<span id="calc-texto-envio">Envío</span>)</span>
+                        <span class="mono" id="calc-envio">$0.00</span>
+                    </div>
+                    <div class="fila">
+                        <span class="meta">Precios con IVA incluido</span>
+                    </div>
+                </div>
+                <div class="total">
+                    <strong>TOTAL</strong>
+                    <span id="calc-total">$0.00</span>
+                </div>
+
+                <div class="pila">
+                    <button type="button" class="btn" id="btn-confirmar">
+                        <span id="txt-btn-confirmar">Confirmar pedido y pagar</span>
+                        <span id="ico-flecha"></span>
+                    </button>
+                    <p class="meta centro" id="nota-tiempo-pago">
+                        Si el pago no se completa inmediatamente, tu pedido queda guardado y tienes 48 horas para
+                        liquidar.
+                    </p>
+                </div>
+            </aside>
+        </div>
+
+        <!-- VISTA 2: Éxito con Folio Generado -->
+        <div id="vista-exito" class="oculto">
+            <div style="max-width: 800px; margin: 0 auto;">
+                <div class="circulo ok" id="icono-exito-circulo">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2.5">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                </div>
+
+                <h1 id="titulo-exito">¡Pedido Confirmado!</h1>
+                <p class="sub" id="subtitulo-exito">Hemos registrado tu pedido exitosamente en el sistema.</p>
+
+                <div class="caja lila">
+                    <span class="rotulo">Número de Folio de Pedido:</span>
+                    <div class="folio" id="folio-numero">LB-2026-0000</div>
+                    <span class="estado pagado" id="badge-estado-pedido">PROCESADO</span>
+                </div>
+
+                <div class="caja">
+                    <h3 style="margin-bottom: 16px;">Resumen de Entrega y Pago</h3>
+                    <dl class="datos">
+                        <dt>Total pagado:</dt>
+                        <dd class="mono" id="exito-total">$0.00 MXN</dd>
+
+                        <dt>Método de entrega:</dt>
+                        <dd id="exito-entrega">--</dd>
+
+                        <dt>Forma de pago:</dt>
+                        <dd id="exito-pago">--</dd>
+
+                        <dt>Instrucciones:</dt>
+                        <dd id="exito-instrucciones">--</dd>
+                    </dl>
+                </div>
+
+                <div style="display: flex; gap: 16px; margin-top: 32px;">
+                    <a href="bolsaCompra.html" class="btn sec" style="width: auto; flex: 1;">Volver al inicio</a>
+                    <button type="button" class="btn" style="width: auto; flex: 1;" onclick="window.print()">Imprimir
+                        comprobante</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- VISTA 3: Reserva Vencida (05-C) -->
+        <div id="vista-vencida" class="vacio-box oculto" style="max-width:600px">
+            <div class="circulo error" style="margin:0 0 8px">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M6 6l12 12M18 6L6 18" />
+                </svg>
+            </div>
+            <h1>Se terminó tu tiempo de apartado</h1>
+            <p class="meta">Pasaron más de 15 minutos y liberamos tus prendas para otras clientas. No se hizo ningún
+                cargo. Tu bolsa se conserva: vuelve a ella para apartar las prendas otra vez.</p>
+            <a href="bolsaCompra.html" class="btn" style="width:300px; margin-top:12px;">Volver a mi bolsa</a>
+        </div>
+
+    </main>
+</body>
+
+</html>
