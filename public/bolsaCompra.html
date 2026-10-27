@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bolsa de compra · Lili's Boutique</title>
+  <link rel="stylesheet" href="css/estilos.css">
+  <script src="js/api.js" defer></script>
+  <script src="js/plantilla.js" defer></script>
+  <script src="js/bolsaCompra.js" defer></script>
+</head>
+<!-- Pasos 4-6 del CU Realizar Pedido, flujos 2.2.1, 2.2.6 y 2.2.9 -->
+<body data-paso="1">
+<main>
+  <div id="avisos"></div>
+
+  <!-- 02-D: bolsa vacia -->
+  <div id="vista-vacia" class="vacio-box oculto">
+    <div class="circulo info" id="ico-vacia"></div>
+    <h1>Tu bolsa está vacía</h1>
+    <p class="meta">Agrega al menos una prenda para hacer tu pedido.</p>
+    <a href="catalogo.html" class="btn" style="width:280px;margin-top:12px">Ver la colección</a>
+  </div>
+
+  <!-- 02-A, 02-B, 02-C y 02-E -->
+  <div id="vista-bolsa" class="dos oculto">
+    <div>
+      <div class="cabeza"><h1 style="margin:0">Bolsa de Compra</h1><span class="rotulo" id="cuantas"></span></div>
+      <div id="prendas"></div>
+      <div style="margin-top:24px"><a href="catalogo.html" class="enlace"><span id="ico-atras"></span> Seguir comprando</a></div>
+    </div>
+
+    <aside class="lado">
+      <div class="cabeza"><h2>Resumen del Pedido</h2></div>
+      <div style="padding-top:12px">
+        <div class="fila"><span>Subtotal (<span id="cuantas-resumen"></span>)</span><span class="mono" id="subtotal"></span></div>
+        <div class="fila"><span>Envío</span><span class="meta">Se calcula en el siguiente paso</span></div>
+        <div class="fila"><span class="meta">Precios con IVA incluido</span></div>
+      </div>
+      <div class="total"><strong>TOTAL ESTIMADO</strong><span id="total"></span></div>
+      <div class="pila">
+        <button type="button" class="btn" id="btn-proceder">Proceder al pago <span id="ico-flecha"></span></button>
+        <p class="meta centro" id="nota-proceder">Al continuar apartamos tus prendas por 15 minutos mientras terminas tu compra.</p>
+      </div>
+    </aside>
+  </div>
+</main>
+</body>
+</html>

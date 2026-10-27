@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="css/estilos.css">
   <script src="js/api.js" defer></script>
   <script src="js/plantilla.js" defer></script>
+  <script src="js/tarjeta.js" defer></script>
   <script src="js/metodoPago.js" defer></script>
   <style>
     .marca {
@@ -24,98 +25,10 @@
       color: #fff;
       font-weight: bold;
     }
-    .tarjeta-bancaria {
-      background-color: #f8f9fa;
-      border: 1px solid #e9ecef;
-      border-radius: 8px;
-      padding: 16px;
-      margin-bottom: 20px;
-    }
-    .item-banco {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 8px 0;
-      border-bottom: 1px dashed #dee2e6;
-    }
-    .item-banco:last-child {
-      border-bottom: none;
-    }
-    .btn-copiar {
-      background: #fff;
-      border: 1px solid #000;
-      border-radius: 4px;
-      padding: 4px 10px;
-      font-size: 11px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .btn-copiar:hover {
-      background-color: #000;
-      color: #fff;
-    }
-    .area-subida {
-      border: 2px dashed #C9C0E0;
-      border-radius: 8px;
-      padding: 24px;
-      text-align: center;
-      background-color: var(--info-bg, #F5F2FD);
-      cursor: pointer;
-      transition: border-color 0.3s, background-color 0.3s;
-      position: relative;
-    }
-    .area-subida:hover, .area-subida.dragover {
-      border-color: var(--morado, #4B1F7A);
-      background-color: #EED;
-    }
-    .area-subida input[type="file"] {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      opacity: 0;
-      cursor: pointer;
-    }
-    .previsualizacion-comprobante {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background-color: #f1f3f5;
-      border: 1px solid var(--linea, #E7E7E7);
-      border-radius: 6px;
-      padding: 10px 14px;
-      margin-top: 12px;
-    }
-    .previsualizacion-comprobante img {
-      width: 48px;
-      height: 48px;
-      object-fit: cover;
-      border-radius: 4px;
-      border: 1px solid #ccc;
-    }
-    .btn-eliminar-foto {
-      background: none;
-      border: none;
-      color: var(--error, #A8261B);
-      cursor: pointer;
-      font-weight: bold;
-      font-size: 12px;
-    }
     .deshabilitado {
       opacity: 0.5;
       pointer-events: none;
       background-color: #f2f2f2;
-    }
-    .horarios-boutique {
-      display: grid;
-      grid-template-columns: auto 1fr;
-      gap: 6px 12px;
-      font-size: 12px;
-      margin-top: 10px;
-      padding-top: 10px;
-      border-top: 1px solid var(--linea, #E7E7E7);
     }
   </style>
 </head>
@@ -203,74 +116,22 @@
             </p>
           </div>
 
-          <!-- 2. Formulario Transferencia SPEI (Datos de la dueña + Subida de captura) -->
-          <div id="form-transferencia" class="oculto">
-            <p class="sub" style="margin-bottom:12px">Realiza tu depósito por el total exacto a la cuenta bancaria oficial de la boutique:</p>
-            
-            <div class="tarjeta-bancaria">
-              <div class="item-banco">
-                <div><small class="rotulo">Banco:</small><br><b>BBVA México</b></div>
-                <button type="button" class="btn-copiar" id="copiar-banco">Copiar</button>
-              </div>
-              <div class="item-banco">
-                <div><small class="rotulo">CLABE Interbancaria:</small><br><b class="mono">0121 8000 1234 5678 90</b></div>
-                <button type="button" class="btn-copiar" id="copiar-clabe">Copiar</button>
-              </div>
-              <div class="item-banco">
-                <div><small class="rotulo">Titular de la cuenta:</small><br><b>Ana Lilia - Lili's Boutique S.A. de C.V.</b></div>
-                <button type="button" class="btn-copiar" id="copiar-titular">Copiar</button>
-              </div>
-              <div class="item-banco">
-                <div><small class="rotulo">Concepto / Referencia:</small><br><b class="mono">COMPRA-LILIS</b></div>
-                <button type="button" class="btn-copiar" id="copiar-concepto">Copiar</button>
-              </div>
-            </div>
-
-            <p class="rotulo" style="margin-bottom:8px">Adjuntar captura o comprobante de transferencia *</p>
-            
-            <div class="area-subida" id="area-drop">
-              <input type="file" id="input-comprobante" accept="image/*,.pdf">
-              <div style="display:flex; justify-content:center; align-items:center; gap:8px; margin-bottom:6px;">
-                <span id="ico-subir"></span>
-                <b>Haz clic aquí o arrastra tu captura de pantalla</b>
-              </div>
-              <small style="color:var(--gris, #666);">Formatos permitidos: JPG, PNG, PDF (Máx. 5MB)</small>
-            </div>
-
-            <div id="previsualizacion" class="oculto">
-              <div class="previsualizacion-comprobante">
-                <div style="display:flex;align-items:center;gap:12px">
-                  <img id="img-preview" src="" alt="Comprobante" style="display:none;">
-                  <div>
-                    <b id="nombre-archivo" style="font-size:13px">comprobante.png</b><br>
-                    <small style="color:var(--ok, #1F6B45);">✓ Captura cargada correctamente</small>
-                  </div>
-                </div>
-                <button type="button" class="btn-eliminar-foto" id="btn-quitar-foto">Eliminar</button>
-              </div>
-            </div>
-            <p class="ayuda oculto" id="err-comprobante" style="color:var(--error, #A8261B); margin-top:8px;">Debes adjuntar el comprobante de pago para continuar.</p>
+          <!-- 2. Transferencia SPEI: los datos y el comprobante van despues de confirmar -->
+          <div id="form-transferencia" class="caja lila oculto">
+            <b style="display:block; margin-bottom: 6px; font-size: 15px;">Transferencia bancaria</b>
+            <p class="sub" style="margin-bottom:0;">
+              Al confirmar te damos la CLABE, el banco y tu folio para ponerlo como concepto.
+              El comprobante lo subes desde el estado de tu pedido; tienes 48 horas para pagar.
+            </p>
           </div>
 
           <!-- 3. Formulario Pago contra entrega en Boutique -->
           <div id="form-contra-entrega" class="caja lila oculto">
-            <b style="display:block; margin-bottom: 6px; font-size: 15px;">Pago y Recolección Directa en Boutique</b>
-            <p class="sub" style="margin-bottom:10px;">
-              Tus prendas se apartarán de inmediato por 15 minutos. Podrás liquidar tu compra directamente en caja al momento de recoger tu pedido.
+            <b style="display:block; margin-bottom: 6px; font-size: 15px;">Pago en la boutique</b>
+            <p class="sub" style="margin-bottom:0;">
+              Al confirmar te damos un folio para pagar en caja cuando recojas tu pedido
+              en el centro de Cd. Obregón. Tienes 48 horas para pasar por él.
             </p>
-            
-            <div class="caja" style="background:#fff; margin-bottom:0; padding:16px;">
-              <p class="rotulo" style="margin-bottom:6px;">Sucursal de Recolección:</p>
-              <b style="color:var(--tinta, #121212);">Lili's Boutique - Sucursal Centro</b><br>
-              <small style="color:var(--gris, #666);">Av. Miguel Hidalgo #450, Col. Centro</small>
-
-              <div class="horarios-boutique">
-                <span class="rotulo">Formas de pago aceptadas:</span>
-                <span>Efectivo, Tarjeta de Crédito/Débito o Vale</span>
-                <span class="rotulo">Horario de atención:</span>
-                <span>Lunes a Sábado: 10:00 AM - 8:00 PM</span>
-              </div>
-            </div>
           </div>
 
         </div>

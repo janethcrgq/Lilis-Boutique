@@ -56,6 +56,15 @@ export class PedidoPrismaRepository implements PedidoRepository {
     return pedido ? aPedido(pedido) : null;
   }
 
+  async listarPorCliente(idCliente: number): Promise<Pedido[]> {
+    const pedidos = await this.prisma.pedido.findMany({
+      where: { idCliente, estadoPedido: { not: 'EN_CARRITO' } },
+      orderBy: { idPedido: 'desc' },
+      include: conDetalles,
+    });
+    return pedidos.map(aPedido);
+  }
+
   async buscarReservas(idPedido: number, ahora: Date): Promise<Reserva[]> {
     return this.prisma.reserva.findMany({
       where: { idPedido, expiraEn: { gt: ahora } },

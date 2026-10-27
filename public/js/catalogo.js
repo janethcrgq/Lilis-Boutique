@@ -1,107 +1,95 @@
 /**
  * public/js/catalogo.js
- * Capa de Presentación - Catálogo y Selección de Productos
+ * Capa de Presentación - Catálogo y Selección de Productos (pasos 1-2 del CU)
+ *
+ * Lee los productos de GET /productos y agrega la prenda (talla + color)
+ * a la bolsa con POST /carrito/prendas.
  */
 
-// 1. Base de datos simulada de los productos
-const inventario = [
-  {
-    id: 'p-01',
-    categoria: 'VESTIDOS',
-    nombre: 'Vestido midi floral',
-    precio: 649.0,
-    disponibles: 3,
-    icono: '<path d="M19 5h10l-1 9 9 29H11l9-29z"/><path d="M20 14h8"/>',
-    tallas: [
-      { val: 'S', stock: 1 },
-      { val: 'M', stock: 2 },
-    ],
-    colores: [
-      { hex: '#1C1C1C', nombre: 'Negro', stock: 2 },
-      { hex: '#B3312C', nombre: 'Rojo', stock: 1 },
-    ],
-  },
-  {
-    id: 'p-02',
-    categoria: 'BLUSAS',
-    nombre: 'Blusa de lino',
-    precio: 389.0,
-    disponibles: 4,
-    icono:
-      '<path d="M17 7l-10 6 4 8 5-3v23h16V18l5 3 4-8-10-6c-1 3-4 5-7 5s-6-2-7-5z"/>',
-    tallas: [
-      { val: 'S', stock: 2 },
-      { val: 'M', stock: 2 },
-    ],
-    colores: [
-      { hex: '#FAFAFA', nombre: 'Blanco', stock: 3 },
-      { hex: '#D9C7A7', nombre: 'Beige', stock: 1 },
-    ],
-  },
-  {
-    id: 'p-03',
-    categoria: 'CALZADO',
-    nombre: 'Sandalia trenzada',
-    precio: 459.0,
-    disponibles: 3,
-    icono:
-      '<path d="M6 34c0-4 4-7 11-7h15c6 0 10 3 10 7v3H6z"/><path d="M15 27l6-12M29 27l-5-12M19 15h7"/>',
-    tallas: [
-      { val: '24', stock: 0 },
-      { val: '25', stock: 3 },
-    ],
-    colores: [
-      { hex: '#7A4E2D', nombre: 'Café', stock: 1 },
-      { hex: '#1C1C1C', nombre: 'Negro', stock: 2 },
-    ],
-  },
-  {
-    id: 'p-04',
-    categoria: 'ACCESORIOS',
-    nombre: 'Bolsa de mano',
-    precio: 529.0,
-    disponibles: 1,
-    ultimaPieza: true,
-    icono: '<path d="M9 19h30l-3 23H12z"/><path d="M17 19v-5a7 7 0 0114 0v5"/>',
-    tallas: [{ val: 'Unitalla', stock: 1 }],
-    colores: [{ hex: '#1C1C1C', nombre: 'Negro', stock: 1 }],
-  },
-];
+// Color de cada circulito; si no esta aqui sale gris.
+const COLORES = {
+  Negro: '#1C1C1C',
+  Rojo: '#B3312C',
+  Blanco: '#FAFAFA',
+  Beige: '#D9C7A7',
+  Cafe: '#7A4E2D',
+};
 
-// Estado local de las selecciones del usuario
+let inventario = [];
+
+// Estado local de las selecciones del usuario: { idProducto: { talla, color } }
 const selecciones = {};
 
 document.addEventListener('DOMContentLoaded', iniciar);
 
-function iniciar() {
-  // Inicializamos el estado vacío para cada producto
+async function iniciar() {
+  try {
+    inventario = await api('GET', '/productos');
+  } catch (error) {
+    avisoDeError(error);
+    return;
+  }
+
+  // Si solo hay una talla o un color se deja elegido.
   inventario.forEach((p) => {
-    selecciones[p.id] = { talla: null, color: null };
+    const tallas = tallasDe(p);
+    const colores = coloresDe(p);
+    selecciones[p.idProducto] = {
+      talla: tallas.length === 1 ? tallas[0] : null,
+      color: colores.length === 1 ? colores[0] : null,
+    };
   });
 
   configurarFiltros();
-  pintarCatalogo('TODO');
+  const categoria = (parametro('categoria') || 'TODO').toUpperCase();
+  marcarFiltro(categoria);
+  pintarCatalogo(categoria);
+}
+
+function tallasDe(p) {
+  return [...new Set(p.variantes.map((v) => v.talla))];
+}
+
+function coloresDe(p) {
+  return [...new Set(p.variantes.map((v) => v.color))];
+}
+
+function varianteDe(p, tallaElegida, colorElegido) {
+  return p.variantes.find((v) => v.talla === tallaElegida && v.color === colorElegido);
+}
+
+// ¿Hay alguna variante con existencia para esa talla o color?
+function hayDe(p, tipo, valor) {
+  const otro = tipo === 'talla' ? 'color' : 'talla';
+  const elegido = selecciones[p.idProducto][otro];
+  return p.variantes.some(
+    (v) => v[tipo] === valor && (!elegido || v[otro] === elegido) && v.disponibles > 0,
+  );
 }
 
 function configurarFiltros() {
   const botones = document.querySelectorAll('#filtros-catalogo span');
   botones.forEach((btn) => {
     btn.addEventListener('click', (e) => {
-      botones.forEach((b) => b.classList.remove('sel'));
-      e.target.classList.add('sel');
+      marcarFiltro(e.target.dataset.filtro);
       pintarCatalogo(e.target.dataset.filtro);
     });
   });
 }
 
+function marcarFiltro(filtro) {
+  document.querySelectorAll('#filtros-catalogo span').forEach((b) => {
+    b.classList.toggle('sel', b.dataset.filtro === filtro);
+  });
+}
+
 function pintarCatalogo(filtro) {
   const grilla = document.getElementById('grilla-productos');
-  if (!grilla) return;
 
   const productosFiltrados =
     filtro === 'TODO'
       ? inventario
-      : inventario.filter((p) => p.categoria === filtro);
+      : inventario.filter((p) => p.categoria.toUpperCase() === filtro);
 
   if (productosFiltrados.length === 0) {
     grilla.innerHTML = '<p class="sub">No hay productos en esta categoría.</p>';
@@ -110,49 +98,53 @@ function pintarCatalogo(filtro) {
 
   grilla.innerHTML = productosFiltrados
     .map((p) => {
-      const estado = selecciones[p.id];
+      const estado = selecciones[p.idProducto];
 
       // Construir Tallas
-      const chipsTallas = p.tallas
+      const chipsTallas = tallasDe(p)
         .map((t) => {
-          const claseAgotado = t.stock === 0 ? 'agotado' : '';
-          const claseSel = estado.talla === t.val ? 'sel' : '';
-          return `<span class="chip ${claseAgotado} ${claseSel}" onclick="seleccionar('${p.id}', 'talla', '${t.val}')">${t.val}</span>`;
+          const claseAgotado = hayDe(p, 'talla', t) ? '' : 'agotado';
+          const claseSel = estado.talla === t ? 'sel' : '';
+          return `<span class="chip ${claseAgotado} ${claseSel}" onclick="seleccionar(${p.idProducto}, 'talla', '${escapar(t)}')">${talla(t)}</span>`;
         })
         .join('');
 
       // Construir Colores
-      const chipsColores = p.colores
+      const chipsColores = coloresDe(p)
         .map((c) => {
-          const claseSel = estado.color === c.hex ? 'sel' : '';
-          return `<span class="color ${claseSel}" style="background:${c.hex}" title="${c.nombre}" onclick="seleccionar('${p.id}', 'color', '${c.hex}')"></span>`;
+          const claseSel = estado.color === c ? 'sel' : '';
+          const fondo = COLORES[c] || '#BDBDBD';
+          return `<span class="color ${claseSel}" style="background:${fondo}" title="${escapar(c)}" onclick="seleccionar(${p.idProducto}, 'color', '${escapar(c)}')"></span>`;
         })
         .join('');
 
-      // Etiqueta de color seleccionado
-      const colorNombre = estado.color
-        ? p.colores.find((c) => c.hex === estado.color).nombre
-        : 'Elige color';
+      const colorNombre = estado.color ? escapar(estado.color) : 'Elige color';
 
       // Construir Texto de Existencias
-      let textoExistencia = `${p.disponibles} disponibles`;
-      if (p.ultimaPieza) textoExistencia = 'Solo queda 1';
+      const elegida = varianteDe(p, estado.talla, estado.color);
+      const disponibles = elegida
+        ? elegida.disponibles
+        : p.variantes.reduce((suma, v) => suma + v.disponibles, 0);
+      let textoExistencia = `${disponibles} disponibles`;
+      if (disponibles === 1) textoExistencia = 'Solo queda 1';
+      if (disponibles === 0) textoExistencia = 'Agotado';
+      const ultimaPieza = !elegida && disponibles === 1;
 
       return `
-      <article class="tarjeta" id="tarjeta-${p.id}">
+      <article class="tarjeta" id="tarjeta-${p.idProducto}">
         <div class="foto">
-          ${p.ultimaPieza ? '<span class="sello">Última pieza</span>' : ''}
-          <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round">${p.icono}</svg>
+          ${ultimaPieza ? '<span class="sello">Última pieza</span>' : ''}
+          <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round">${PRENDAS[p.categoria] || PRENDAS.Accesorios}</svg>
         </div>
-        <h3>${p.nombre}</h3>
-        <div class="precio">$${p.precio.toFixed(2)} MXN</div>
-        
+        <h3>${escapar(p.nombre)}</h3>
+        <div class="precio">${pesos(p.precio)} MXN</div>
+
         <div class="chips">${chipsTallas}</div>
         <div class="chips">${chipsColores} <span class="meta" style="margin-left:6px">${colorNombre}</span></div>
-        
-        <p class="existencia ${p.ultimaPieza ? 'poca' : ''}">${textoExistencia}</p>
-        
-        <button class="btn" onclick="agregarABolsa('${p.id}')">Agregar a la bolsa</button>
+
+        <p class="existencia ${disponibles <= 1 ? 'poca' : ''}">${textoExistencia}</p>
+
+        <button class="btn" onclick="agregarABolsa(${p.idProducto})"${disponibles === 0 ? ' disabled' : ''}>Agregar a la bolsa</button>
       </article>
     `;
     })
@@ -163,86 +155,49 @@ function pintarCatalogo(filtro) {
 window.seleccionar = function (idProducto, tipo, valor) {
   selecciones[idProducto][tipo] = valor;
   // Re-pintamos el catálogo manteniendo el filtro actual
-  const filtroActual = document.querySelector('#filtros-catalogo span.sel')
-    .dataset.filtro;
+  const filtroActual = document.querySelector('#filtros-catalogo span.sel').dataset.filtro;
   pintarCatalogo(filtroActual);
 };
 
 window.agregarABolsa = async function (idProducto) {
-  const producto = inventario.find((p) => p.id === idProducto);
+  limpiarAvisos();
+  const producto = inventario.find((p) => p.idProducto === idProducto);
   const estado = selecciones[idProducto];
 
   // 1. Validaciones
   if (!estado.talla || !estado.color) {
-    if (typeof mostrarAviso === 'function') {
-      mostrarAviso('error', 'Por favor selecciona talla y color.');
-    } else {
-      alert('Por favor selecciona talla y color.');
-    }
+    mostrarAviso('error', 'Elige talla y color.', 'Para agregar la prenda a tu bolsa necesitamos las dos cosas.');
+    return;
+  }
+  const variante = varianteDe(producto, estado.talla, estado.color);
+  if (!variante || variante.disponibles === 0) {
+    mostrarAviso('error', 'Esa combinación está agotada.', 'Prueba con otra talla u otro color.');
     return;
   }
 
-  const nombreColor = producto.colores.find(
-    (c) => c.hex === estado.color,
-  ).nombre;
-
-  // 2. Simular petición al backend o guardar en sessionStorage
+  // 2. Pasos 1-2 del CU: si no hay carrito, el servidor lo crea.
   try {
-    if (typeof api === 'function') {
-      // Intento con la arquitectura real de Lili's Boutique
-      await api('POST', '/carrito', {
-        productoId: producto.id,
-        talla: estado.talla,
-        color: nombreColor,
-        cantidad: 1,
-      });
-    } else {
-        console.log("JAJAJAJ")
-      // Fallback local: Guardar simulado en sessionStorage para las pruebas
-      let carrito = JSON.parse(sessionStorage.getItem('lb.carrito')) || {
-        prendas: [],
-        subtotal: 0,
-      };
-      carrito.prendas.push({
-        id: producto.id,
-        nombre: producto.nombre,
-        talla: estado.talla,
-        color: nombreColor,
-        precio: producto.precio,
-        cantidad: 1,
-        imagenUrl: 'url_simulada',
-        categoria: producto.categoria,
-      });
-      carrito.subtotal += producto.precio;
-      sessionStorage.setItem('lb.carrito', JSON.stringify(carrito));
-
-      // Activar la sesión de reserva si no existe
-      if (!sessionStorage.getItem('lb.reserva')) {
-        sessionStorage.setItem('lb.reserva', Date.now() + 15 * 60000);
-      }
-    }
-
-    // 3. Mostrar Toast animado y actualizar botón
-    mostrarToastNotificacion(producto, estado.talla, nombreColor);
-
-    const boton = document.querySelector(`#tarjeta-${idProducto} .btn`);
-    if (boton) {
-      const original = boton.innerHTML;
-      boton.innerHTML = '¡Agregado! ✓';
-      boton.classList.add('ok');
-      setTimeout(() => {
-        boton.innerHTML = original;
-        boton.classList.remove('ok');
-      }, 2000);
-    }
+    await api('POST', '/carrito/prendas', { idVariante: variante.idVariante, cantidad: 1 });
   } catch (error) {
-    console.error('Error al agregar:', error);
+    avisoDeError(error);
+    return;
   }
+
+  // 3. Mostrar Toast animado y actualizar botón
+  actualizarBolsa();
+  mostrarToastNotificacion(producto, estado.talla, estado.color);
+
+  const boton = document.querySelector(`#tarjeta-${idProducto} .btn`);
+  boton.innerHTML = '¡Agregado!';
+  boton.classList.add('ok');
+  setTimeout(() => {
+    boton.innerHTML = 'Agregar a la bolsa';
+    boton.classList.remove('ok');
+  }, 2000);
 };
 
-function mostrarToastNotificacion(producto, talla, colorNombre) {
+function mostrarToastNotificacion(producto, tallaElegida, colorNombre) {
   const contenedor = document.getElementById('contenedor-toasts');
-  if (!contenedor) return;
 
   const idToast = 'toast-' + Date.now();
   const toast = document.createElement('div');
@@ -251,11 +206,11 @@ function mostrarToastNotificacion(producto, talla, colorNombre) {
 
   toast.innerHTML = `
     <div class="foto-toast">
-      <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round">${producto.icono}</svg>
+      <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round">${PRENDAS[producto.categoria] || PRENDAS.Accesorios}</svg>
     </div>
     <div>
       <b>Agregaste a tu bolsa</b>
-      <small>${producto.nombre} · ${talla} · ${colorNombre} · 1 pza</small>
+      <small>${escapar(producto.nombre)} · ${talla(tallaElegida)} · ${escapar(colorNombre)} · 1 pza</small>
       <a href="bolsaCompra.html">Ver bolsa y pagar</a>
     </div>
   `;

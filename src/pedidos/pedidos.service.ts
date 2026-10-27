@@ -37,6 +37,11 @@ export class PedidosService {
     return pedido;
   }
 
+  // Para "Mis pedidos": todos menos el carrito.
+  listar(idCliente: number): Promise<Pedido[]> {
+    return this.repo.listarPorCliente(idCliente);
+  }
+
   // Pasos 17-18 del CU: "Confirmar pedido".
   async confirmar(
     idCliente: number,

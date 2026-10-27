@@ -7,7 +7,6 @@ const estado = {
   carrito: null,
   entrega: null,
   formaPago: 'TARJETA', // 'TARJETA', 'TRANSFERENCIA', 'CONTRA_ENTREGA'
-  comprobanteArchivo: null
 };
 
 document.addEventListener('DOMContentLoaded', iniciar);
@@ -35,10 +34,13 @@ async function iniciar() {
     if (typeof avisoDeError === 'function') avisoDeError(error);
   }
 
+  if (!estado.carrito || estado.carrito.detalles.length === 0) {
+    location.assign('bolsaCompra.html');
+    return;
+  }
+
   configurarSelectorMetodoPago();
   configurarCamposTarjeta();
-  configurarSubidaComprobante();
-  configurarBotonesCopiar();
 
   const btnContinuar = document.getElementById('btn-continuar');
   if (btnContinuar) {
@@ -57,9 +59,6 @@ function insertarIconos() {
 
   const flecha = document.getElementById('ico-flecha');
   if (flecha) flecha.innerHTML = icono('flecha');
-
-  const subir = document.getElementById('ico-subir');
-  if (subir) subir.innerHTML = icono('subir');
 }
 
 function pintar() {
@@ -115,23 +114,23 @@ function pintarResumen() {
 
   if (!estado.carrito || !contenedor) return;
 
-  const { prendas, subtotal } = estado.carrito;
+  const { detalles, subtotal } = estado.carrito;
   const costoEnvio = (estado.entrega && estado.entrega.costoEnvio) ? estado.entrega.costoEnvio : 0;
   const total = subtotal + costoEnvio;
 
-  const totalPrendas = prendas.reduce((acc, p) => acc + p.cantidad, 0);
+  const totalPrendas = detalles.reduce((acc, p) => acc + p.cantidad, 0);
   if (txtCant) txtCant.textContent = `${totalPrendas} PRENDA${totalPrendas === 1 ? '' : 'S'}`;
   if (txtTextoEnvio && estado.entrega) txtTextoEnvio.textContent = estado.entrega.textoDireccion || 'Entrega';
 
   if (typeof foto === 'function' && typeof escapar === 'function') {
-    contenedor.innerHTML = prendas.map(item => `
+    contenedor.innerHTML = detalles.map(item => `
       <div class="mini">
-        <div class="foto">${foto(item.categoria, item.imagenUrl)}</div>
+        ${foto(item.categoria, item.imagenURL)}
         <div>
           <b>${escapar(item.nombre)}</b>
           <span class="meta">${talla(item.talla)} · ${escapar(item.color)} · Cant: ${item.cantidad}</span>
         </div>
-        <span class="precio">${pesos(item.precio * item.cantidad)}</span>
+        <span class="precio">${pesos(item.precioUnitario * item.cantidad)}</span>
       </div>
     `).join('');
   }
@@ -194,99 +193,6 @@ function configurarCamposTarjeta() {
   }
 }
 
-function configurarSubidaComprobante() {
-  const fileInput = document.getElementById('input-comprobante');
-  const btnQuitar = document.getElementById('btn-quitar-foto');
-
-  if (fileInput) {
-    fileInput.addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      if (file) {
-        procesarArchivoComprobante(file);
-      }
-    });
-  }
-
-  if (btnQuitar) {
-    btnQuitar.addEventListener('click', () => {
-      estado.comprobanteArchivo = null;
-      if (fileInput) fileInput.value = '';
-      if (typeof mostrar === 'function') {
-        mostrar('area-drop', true);
-        mostrar('previsualizacion', false);
-        mostrar('err-comprobante', false);
-      }
-    });
-  }
-}
-
-function procesarArchivoComprobante(file) {
-  estado.comprobanteArchivo = file;
-
-  const nombreEl = document.getElementById('nombre-archivo');
-  const imgEl = document.getElementById('img-preview');
-
-  if (nombreEl) nombreEl.textContent = file.name;
-
-  if (file.type.startsWith('image/')) {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      if (imgEl) {
-        imgEl.src = e.target.result;
-        imgEl.style.display = 'block';
-      }
-    };
-    reader.readAsDataURL(file);
-  } else {
-    if (imgEl) imgEl.style.display = 'none';
-  }
-
-  if (typeof mostrar === 'function') {
-    mostrar('area-drop', false);
-    mostrar('previsualizacion', true);
-    mostrar('err-comprobante', false);
-  }
-}
-
-function configurarBotonesCopiar() {
-  const copiar = (id, texto) => {
-    const btn = document.getElementById(id);
-    if (!btn) return;
-    btn.addEventListener('click', () => {
-      navigator.clipboard.writeText(texto).then(() => {
-        const original = btn.textContent;
-        btn.textContent = '¡Copiado!';
-        btn.style.backgroundColor = '#28a745';
-        btn.style.color = '#fff';
-        btn.style.borderColor = '#28a745';
-        setTimeout(() => {
-          btn.textContent = original;
-          btn.style.backgroundColor = '#fff';
-          btn.style.color = '#000';
-          btn.style.borderColor = '#000';
-        }, 1500);
-      });
-    });
-  };
-
-  copiar('copiar-banco', 'BBVA México');
-  copiar('copiar-clabe', '012180001234567890');
-  copiar('copiar-titular', "Ana Lilia - Lili's Boutique S.A. de C.V.");
-  copiar('copiar-concepto', 'COMPRA-LILIS');
-}
-
-function validarLuhn(num) {
-  let sum = 0;
-  let shouldDouble = false;
-  for (let i = num.length - 1; i >= 0; i--) {
-    let digit = parseInt(num.charAt(i), 10);
-    if (shouldDouble && (digit *= 2) > 9) digit -= 9;
-    sum += digit;
-    shouldDouble = !shouldDouble;
-  }
-  return (sum % 10) === 0;
-}
-
 function continuarAConfirmacion() {
   if (typeof limpiarAvisos === 'function') limpiarAvisos();
 
@@ -302,7 +208,7 @@ function continuarAConfirmacion() {
 
     let valido = true;
 
-    if (num.length < 13 || !validarLuhn(num)) {
+    if (num.length < 13 || !luhnValido(num)) {
       if (typeof mostrar === 'function') mostrar('err-tarjeta', true);
       valido = false;
     } else {
@@ -335,16 +241,13 @@ function continuarAConfirmacion() {
       return;
     }
 
-    terminacion = num.slice(-4);
-    tokenTarjeta = `tok_sim_${terminacion}`;
-
-  } else if (estado.formaPago === 'TRANSFERENCIA') {
-    if (!estado.comprobanteArchivo) {
-      if (typeof mostrar === 'function') mostrar('err-comprobante', true);
-      if (typeof mostrarAviso === 'function') mostrarAviso('error', 'Debes adjuntar tu captura de transferencia para continuar.');
+    try {
+      const tarjeta = tokenizarTarjeta({ numero: num, vencimiento: `${mes}/${anio}`, cvv, titular: nombre });
+      tokenTarjeta = tarjeta.tokenTarjeta;
+      terminacion = tarjeta.terminacion;
+    } catch (error) {
+      mostrarAviso('error', 'Revisa los datos de tu tarjeta.', error.message);
       return;
-    } else {
-      if (typeof mostrar === 'function') mostrar('err-comprobante', false);
     }
   }
 
@@ -353,7 +256,6 @@ function continuarAConfirmacion() {
       formaPago: estado.formaPago,
       tokenTarjeta,
       terminacion,
-      comprobanteNombre: estado.comprobanteArchivo ? estado.comprobanteArchivo.name : null
     });
   }
 

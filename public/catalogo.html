@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=1280">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>01 Catálogo - Lili's Boutique</title>
   
   <!-- Fuentes -->
@@ -44,6 +44,15 @@
     .btn { display: flex; align-items: center; justify-content: center; gap: 10px; background: var(--tinta, #121212); color: #fff; height: 48px; padding: 0 32px; font: 500 12px var(--sans, sans-serif); letter-spacing: .12em; text-transform: uppercase; border: 0; width: 100%; cursor: pointer; transition: background 0.2s; }
     .btn:hover { background: #333; }
     .btn.ok { background: var(--ok, #1F6B45); }
+    .btn:disabled { background: #BDBDBD; cursor: not-allowed; }
+
+    @media (max-width: 900px) {
+      .catalogo { grid-template-columns: repeat(2, 1fr); gap: 20px; }
+      .tarjeta .foto { height: 200px; }
+      .filtros { flex-wrap: wrap; }
+      .toast-container { left: 16px; right: 16px; }
+      .toast { width: auto; }
+    }
 
     /* Notificaciones Toast de Agregado a la Bolsa */
     .toast-container { position: fixed; top: 88px; right: 64px; z-index: 100; display: flex; flex-direction: column; gap: 12px; }
@@ -59,7 +68,7 @@
   </style>
 </head>
 
-<body data-paso="1">
+<body data-nav="Colección">
   <main>
     <div id="avisos"></div>
     

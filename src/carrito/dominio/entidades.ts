@@ -12,8 +12,10 @@ export interface DetalleCarrito {
   idDetallePedido: number;
   idVariante: number;
   nombre: string;
+  categoria: string;
   talla: string;
   color: string;
+  imagenURL: string | null;
   cantidad: number;
   precioUnitario: number;
   stock: number;

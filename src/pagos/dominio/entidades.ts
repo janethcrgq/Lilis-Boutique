@@ -6,7 +6,9 @@ export interface Pago {
   idPago: number;
   idPedido: number;
   idCliente: number;
+  nombreClienta: string;
   numPedido: string | null;
+  fechaLimitePago: Date | null;
   estadoPedido: string;
   metodoEntrega: string | null;
   monto: number;
@@ -39,7 +41,6 @@ export interface InstruccionesDePago {
   concepto?: string;
   folio?: string;
 }
-
 
 export interface PrendaDelPedido {
   nombre: string;

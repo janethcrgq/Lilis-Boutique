@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=1280">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>04 Confirmación del pedido - Lili's Boutique</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link
@@ -25,13 +25,6 @@
             border-color: var(--lila-2, #DED6F5);
         }
 
-        .folio {
-            font: 500 40px var(--mono, monospace);
-            letter-spacing: .06em;
-            color: var(--tinta, #121212);
-            margin: 8px 0 16px;
-        }
-
         .circulo {
             width: 60px;
             height: 60px;
@@ -49,22 +42,6 @@
         .circulo.error {
             background: var(--error-bg, #FDF1EF);
             color: var(--error, #A8261B);
-        }
-
-        .datos {
-            display: grid;
-            grid-template-columns: 180px 1fr;
-            row-gap: 12px;
-            font-size: 14px;
-        }
-
-        .datos dt {
-            color: var(--gris, #727272);
-        }
-
-        .datos dd {
-            color: var(--tinta, #121212);
-            font-weight: 500;
         }
 
         .btn.cargando {
@@ -160,51 +137,7 @@
             </aside>
         </div>
 
-        <!-- VISTA 2: Éxito con Folio Generado -->
-        <div id="vista-exito" class="oculto">
-            <div style="max-width: 800px; margin: 0 auto;">
-                <div class="circulo ok" id="icono-exito-circulo">
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                        stroke-width="2.5">
-                        <polyline points="20 6 9 17 4 12"></polyline>
-                    </svg>
-                </div>
-
-                <h1 id="titulo-exito">¡Pedido Confirmado!</h1>
-                <p class="sub" id="subtitulo-exito">Hemos registrado tu pedido exitosamente en el sistema.</p>
-
-                <div class="caja lila">
-                    <span class="rotulo">Número de Folio de Pedido:</span>
-                    <div class="folio" id="folio-numero">LB-2026-0000</div>
-                    <span class="estado pagado" id="badge-estado-pedido">PROCESADO</span>
-                </div>
-
-                <div class="caja">
-                    <h3 style="margin-bottom: 16px;">Resumen de Entrega y Pago</h3>
-                    <dl class="datos">
-                        <dt>Total pagado:</dt>
-                        <dd class="mono" id="exito-total">$0.00 MXN</dd>
-
-                        <dt>Método de entrega:</dt>
-                        <dd id="exito-entrega">--</dd>
-
-                        <dt>Forma de pago:</dt>
-                        <dd id="exito-pago">--</dd>
-
-                        <dt>Instrucciones:</dt>
-                        <dd id="exito-instrucciones">--</dd>
-                    </dl>
-                </div>
-
-                <div style="display: flex; gap: 16px; margin-top: 32px;">
-                    <a href="bolsaCompra.html" class="btn sec" style="width: auto; flex: 1;">Volver al inicio</a>
-                    <button type="button" class="btn" style="width: auto; flex: 1;" onclick="window.print()">Imprimir
-                        comprobante</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- VISTA 3: Reserva Vencida (05-C) -->
+        <!-- VISTA 2: Reserva Vencida (05-C) -->
         <div id="vista-vencida" class="vacio-box oculto" style="max-width:600px">
             <div class="circulo error" style="margin:0 0 8px">
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

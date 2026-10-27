@@ -1,12 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import { DatosTarjeta, FormaPago, Pago, ResumenDelPedido } from '../dominio/entidades';
+import {
+  DatosTarjeta,
+  FormaPago,
+  Pago,
+  ResumenDelPedido,
+} from '../dominio/entidades';
 import { PagoRepository } from '../dominio/pago.repository';
 import { PrismaService } from '../../prisma/prisma.service';
 import { crearPago } from './crear-pago';
 
 const completo = {
-  pedido: true,
+  pedido: { include: { cliente: { include: { usuario: true } } } },
   pagoTransferencia: true,
   pagoContraEntrega: true,
 } satisfies Prisma.PagoInclude;
@@ -32,7 +37,9 @@ function aPago(pago: PagoCompleto): Pago {
     idPago: pago.idPago,
     idPedido: pago.idPedido,
     idCliente: pago.pedido.idCliente,
+    nombreClienta: `${pago.pedido.cliente.usuario.nombre} ${pago.pedido.cliente.usuario.apellido}`,
     numPedido: pago.pedido.numPedido,
+    fechaLimitePago: pago.pedido.fechaLimitePago,
     estadoPedido: pago.pedido.estadoPedido,
     metodoEntrega: pago.pedido.metodoEntrega,
     monto: Number(pago.monto),
@@ -133,8 +140,6 @@ export class PagoPrismaRepository implements PagoRepository {
     });
     return pedido ? aResumen(pedido) : null;
   }
-
-  
 
   async crear(
     idPedido: number,

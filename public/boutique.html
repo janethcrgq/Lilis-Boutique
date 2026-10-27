@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Panel de pagos · Lili's Boutique</title>
+  <link rel="stylesheet" href="css/estilos.css">
+  <script src="js/api.js" defer></script>
+  <script src="js/plantilla.js" defer></script>
+  <script src="js/boutique.js" defer></script>
+</head>
+<!-- Panel de la Dueña y la Vendedora: flujos 2.2.3 (aprobar transferencia) y 2.2.4 (cobrar con folio) -->
+<body data-panel>
+<main>
+  <h1>Pagos</h1>
+  <div class="tabs">
+    <button type="button" id="tab-transferencias" class="sel">Transferencias por aprobar<i id="cuantas" class="oculto"></i></button>
+    <button type="button" id="tab-cobro">Cobro en boutique</button>
+  </div>
+  <div id="avisos"></div>
+
+  <!-- 07-A y 07-B: la Duena aprueba transferencias -->
+  <section id="vista-transferencias">
+    <table>
+      <thead><tr><th>Pedido</th><th>Clienta</th><th>Monto</th><th>Referencia</th><th>Comprobante</th><th>Fecha límite</th><th></th></tr></thead>
+      <tbody id="filas"></tbody>
+    </table>
+    <p class="meta" id="sin-transferencias" style="margin-top:16px">No hay transferencias por aprobar.</p>
+    <p class="meta" style="margin-top:16px">Revisa que el monto y el concepto (folio LB-…) coincidan con el depósito en la cuenta antes de aprobar.</p>
+  </section>
+
+  <!-- 07-C, 07-D y 07-E: la Vendedora cobra con el folio CE-… -->
+  <section id="vista-cobro" class="oculto">
+    <div id="cobro-buscar">
+      <form id="form-folio" class="rejilla" style="max-width:520px;align-items:end">
+        <div class="campo" id="campo-folio" style="margin:0">
+          <label for="folio">Folio de pago</label>
+          <input id="folio" class="mono" placeholder="CE-000001" autocomplete="off" required>
+          <p class="ayuda oculto" id="ayuda-folio">No hay un pago pendiente con ese folio.</p>
+        </div>
+        <button type="submit" class="btn sec chico" style="height:44px">Buscar</button>
+      </form>
+
+      <div id="pago-encontrado" class="dos oculto" style="margin-top:32px">
+        <div class="caja" style="margin:0">
+          <dl class="datos">
+            <dt>Pedido</dt><dd class="mono" id="cobro-pedido"></dd>
+            <dt>Clienta</dt><dd id="cobro-clienta"></dd>
+            <dt>Entrega</dt><dd>Recoger en boutique</dd>
+            <dt>Fecha límite</dt><dd id="cobro-limite"></dd>
+          </dl>
+        </div>
+        <div>
+          <div class="caja lila" style="margin-bottom:16px">
+            <p class="rotulo">Total a cobrar</p>
+            <p class="folio" style="font-size:34px" id="cobro-monto"></p>
+          </div>
+          <button type="button" class="btn" id="btn-cobrar">Registrar cobro</button>
+          <p class="meta centro" style="margin-top:10px">Cobra con tarjeta o efectivo antes de registrar.</p>
+        </div>
+      </div>
+    </div>
+
+    <div id="cobro-listo" class="vacio-box oculto">
+      <div class="circulo ok" id="ico-listo"></div>
+      <h1>Cobro registrado</h1>
+      <p class="meta" id="listo-detalle"></p>
+      <p class="meta" id="listo-entregar"></p>
+      <button type="button" class="btn sec" style="width:260px;margin-top:8px" id="btn-otro">Cobrar otro folio</button>
+    </div>
+  </section>
+</main>
+</body>
+</html>

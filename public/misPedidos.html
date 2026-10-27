@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mis pedidos · Lili's Boutique</title>
+  <link rel="stylesheet" href="css/estilos.css">
+  <script src="js/api.js" defer></script>
+  <script src="js/plantilla.js" defer></script>
+  <script src="js/misPedidos.js" defer></script>
+</head>
+<!-- Desde aqui la clienta vuelve a un pedido pendiente para pagarlo o subir su comprobante (2.2.3) -->
+<body>
+<main>
+  <h1>Mis pedidos</h1>
+  <p class="sub">Entra a un pedido para ver su estado, pagarlo o subir tu comprobante.</p>
+  <div id="avisos"></div>
+
+  <table id="tabla" class="oculto">
+    <thead><tr><th>Pedido</th><th>Fecha</th><th>Prendas</th><th>Entrega</th><th>Total</th><th>Estado</th><th></th></tr></thead>
+    <tbody id="filas"></tbody>
+  </table>
+
+  <div id="sin-pedidos" class="vacio-box oculto">
+    <h2>Todavía no tienes pedidos</h2>
+    <p class="meta">Cuando confirmes una compra aparecerá aquí.</p>
+    <a href="catalogo.html" class="btn" style="width:280px;margin-top:12px">Ver la colección</a>
+  </div>
+</main>
+</body>
+</html>

@@ -77,7 +77,7 @@ async function main() {
       precio: 649,
       variantes: {
         create: [
-          { talla: 'M', color: 'Negro', stock: 3 },
+          { talla: 'M', color: 'Negro', stock: 5 },
           { talla: 'S', color: 'Rojo', stock: 5 },
         ],
       },
@@ -115,7 +115,7 @@ async function main() {
       nombre: 'Bolsa de mano',
       precio: 529,
       variantes: {
-        create: [{ talla: 'UNITALLA', color: 'Negro', stock: 1 }],
+        create: [{ talla: 'UNITALLA', color: 'Negro', stock: 2 }],
       },
     },
   });

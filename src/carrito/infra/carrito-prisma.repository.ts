@@ -5,7 +5,11 @@ import { CarritoRepository } from '../dominio/carrito.repository';
 import { PrismaService } from '../../prisma/prisma.service';
 
 const conDetalles = {
-  detalles: { include: { variante: { include: { producto: true } } } },
+  detalles: {
+    include: {
+      variante: { include: { producto: { include: { categoria: true } } } },
+    },
+  },
 } satisfies Prisma.PedidoInclude;
 
 type PedidoConDetalles = Prisma.PedidoGetPayload<{
@@ -21,8 +25,10 @@ function aCarrito(pedido: PedidoConDetalles): Carrito {
       idDetallePedido: d.idDetallePedido,
       idVariante: d.idVariante,
       nombre: d.variante.producto.nombre,
+      categoria: d.variante.producto.categoria.nombre,
       talla: d.variante.talla,
       color: d.variante.color,
+      imagenURL: d.variante.imagenURL,
       cantidad: d.cantidad,
       precioUnitario: Number(d.precioUnitario),
       stock: d.variante.stock,

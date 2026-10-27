@@ -14,7 +14,6 @@ export interface PagoRepository {
     numeroReferencia: string,
     comprobanteURL: string,
   ): Promise<Pago>;
-  listarTransferenciasPendientes(): Promise<Pago[]>;
   buscarUltimo(idPedido: number): Promise<Pago | null>;
   buscarResumen(idPedido: number): Promise<ResumenDelPedido | null>;
 }
