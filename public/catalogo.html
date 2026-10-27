@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="es">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=1280">
+  <title>01 Catálogo - Lili's Boutique</title>
+  
+  <!-- Fuentes -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&family=Playfair+Display:wght@400;500&display=swap" rel="stylesheet">
+  
+  <!-- Archivos del proyecto -->
+  <link rel="stylesheet" href="css/estilos.css">
+  <script src="js/api.js" defer></script>
+  <script src="js/plantilla.js" defer></script>
+  <script src="js/catalogo.js" defer></script>
+
+  <style>
+    /* Estilos específicos para la grilla del catálogo y las tarjetas */
+    .catalogo { display: grid; grid-template-columns: repeat(4, 1fr); gap: 28px; }
+    .tarjeta { display: flex; flex-direction: column; }
+    .tarjeta .foto { height: 300px; background: linear-gradient(160deg, #F4F1FA, #E3DCF2); display: grid; place-items: center; color: #8C7AB6; position: relative; }
+    .tarjeta .foto svg { width: 46%; height: 46%; }
+    .tarjeta h3 { margin-top: 14px; font-size: 17px; }
+    .tarjeta .precio { text-align: left; margin-top: 2px; font: 500 15px var(--mono, monospace); color: var(--tinta, #121212); }
+    
+    .chips { display: flex; gap: 6px; margin: 12px 0 0; flex-wrap: wrap; align-items: center; }
+    .chip { border: 1px solid #D4D4D4; padding: 4px 10px; font-size: 11px; cursor: pointer; transition: all 0.2s; user-select: none; }
+    .chip.sel { border-color: var(--tinta, #121212); background: var(--tinta, #121212); color: #fff; }
+    .chip.agotado { color: #BDBDBD; text-decoration: line-through; background: var(--suave, #F8F8F8); border-color: #E5E5E5; pointer-events: none; }
+    
+    .color { width: 20px; height: 20px; border-radius: 50%; border: 1px solid #CCC; cursor: pointer; transition: all 0.2s; }
+    .color.sel { outline: 1.5px solid var(--tinta, #121212); outline-offset: 2px; }
+    
+    .existencia { font-size: 12px; color: var(--gris, #727272); margin: 10px 0 14px; flex-grow: 1; }
+    .existencia.poca { color: var(--alerta, #8A5A00); font-weight: 500; }
+    .sello { position: absolute; top: 12px; left: 12px; background: #fff; font: 600 10px var(--sans, sans-serif); letter-spacing: .1em; text-transform: uppercase; padding: 4px 8px; color: var(--tinta, #121212); }
+    
+    .filtros { display: flex; gap: 8px; margin: 20px 0 32px; }
+    .filtros span { border: 1px solid #D4D4D4; padding: 8px 16px; font-size: 12px; letter-spacing: .06em; cursor: pointer; transition: all 0.2s; }
+    .filtros span.sel { background: var(--tinta, #121212); color: #fff; border-color: var(--tinta, #121212); }
+    
+    .btn { display: flex; align-items: center; justify-content: center; gap: 10px; background: var(--tinta, #121212); color: #fff; height: 48px; padding: 0 32px; font: 500 12px var(--sans, sans-serif); letter-spacing: .12em; text-transform: uppercase; border: 0; width: 100%; cursor: pointer; transition: background 0.2s; }
+    .btn:hover { background: #333; }
+    .btn.ok { background: var(--ok, #1F6B45); }
+
+    /* Notificaciones Toast de Agregado a la Bolsa */
+    .toast-container { position: fixed; top: 88px; right: 64px; z-index: 100; display: flex; flex-direction: column; gap: 12px; }
+    .toast { width: 360px; background: var(--tinta, #121212); color: #fff; padding: 16px 18px; display: grid; grid-template-columns: 48px 1fr; gap: 14px; box-shadow: 0 12px 30px rgba(0,0,0,.18); font-size: 13px; animation: slideIn 0.3s ease-out forwards; }
+    .toast.saliendo { animation: fadeOut 0.3s ease-in forwards; }
+    .toast .foto-toast { height: 60px; background: #333; display: grid; place-items: center; color:#fff; }
+    .toast .foto-toast svg { width: 24px; height: 24px; }
+    .toast small { color: #BDBDBD; display: block; margin-top: 2px; }
+    .toast a { color: #fff; text-decoration: underline; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; display: inline-block; margin-top: 8px; cursor: pointer; }
+
+    @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+  </style>
+</head>
+
+<body data-paso="1">
+  <main>
+    <div id="avisos"></div>
+    
+    <!-- Contenedor dinámico para los mensajes al agregar prendas -->
+    <div class="toast-container" id="contenedor-toasts"></div>
+
+    <h1>Colección Otoño</h1>
+    <p class="sub" style="margin-bottom:0">Ropa, calzado y accesorios para mujer. Elige talla y color para agregar a tu bolsa.</p>
+    
+    <!-- Filtros -->
+    <div class="filtros" id="filtros-catalogo">
+      <span class="sel" data-filtro="TODO">TODO</span>
+      <span data-filtro="VESTIDOS">VESTIDOS</span>
+      <span data-filtro="BLUSAS">BLUSAS</span>
+      <span data-filtro="CALZADO">CALZADO</span>
+      <span data-filtro="ACCESORIOS">ACCESORIOS</span>
+    </div>
+
+    <!-- Catálogo de productos (Pintado con JS) -->
+    <div class="catalogo" id="grilla-productos"></div>
+  </main>
+</body>
+</html>
