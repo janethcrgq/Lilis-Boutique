@@ -1,3 +1,4 @@
+import { Transform } from 'class-transformer';
 import {
   IsInt,
   IsNotEmpty,
@@ -13,17 +14,20 @@ export class CrearDireccionDto {
   idZona!: number;
 
   @IsString()
-  @IsNotEmpty()
+  @Transform(({ value }: { value: unknown }) => typeof value === 'string' ? value.trim() : value)
+  @IsNotEmpty({ message: 'Este campo es requerido' })
   @MaxLength(150)
   calle!: string;
 
   @IsString()
-  @IsNotEmpty()
+  @Transform(({ value }: { value: unknown }) => typeof value === 'string' ? value.trim() : value)
+  @IsNotEmpty({ message: 'Este campo es requerido' })
   @MaxLength(20)
   numeroCasa!: string;
 
   @IsString()
-  @IsNotEmpty()
+  @Transform(({ value }: { value: unknown }) => typeof value === 'string' ? value.trim() : value)
+  @IsNotEmpty({ message: 'Este campo es requerido' })
   @MaxLength(100)
   colonia!: string;
 

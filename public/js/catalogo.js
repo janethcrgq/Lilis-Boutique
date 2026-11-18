@@ -179,6 +179,10 @@ window.agregarABolsa = async function (idProducto) {
   try {
     await api('POST', '/carrito/prendas', { idVariante: variante.idVariante, cantidad: 1 });
   } catch (error) {
+    if (error.error === 'SinExistenciaError') {
+      mostrarAviso('alerta', 'Stock máximo alcanzado', error.message);
+      return;
+    }
     avisoDeError(error);
     return;
   }

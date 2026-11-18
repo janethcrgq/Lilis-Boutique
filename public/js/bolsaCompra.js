@@ -44,7 +44,7 @@ function pintar() {
   let html = '';
   carrito.detalles.forEach((d) => {
     piezas += d.cantidad;
-    const hay = sinExistencia[d.idDetallePedido];
+    const hay = sinExistencia[d.idDetallePedido] ?? d.stock;
     const falta = hay !== undefined && d.cantidad > hay;
     let nota = '';
     if (falta) {
@@ -60,7 +60,7 @@ function pintar() {
           <div class="cant">
             <button type="button" onclick="cambiarCantidad(${d.idDetallePedido}, ${d.cantidad - 1})" aria-label="Quitar una">−</button>
             <b>${d.cantidad}</b>
-            <button type="button" onclick="cambiarCantidad(${d.idDetallePedido}, ${d.cantidad + 1})" aria-label="Agregar una">+</button>
+            <button type="button" onclick="cambiarCantidad(${d.idDetallePedido}, ${d.cantidad + 1})" aria-label="Agregar una" ${d.cantidad >= hay ? 'disabled title="Stock máximo alcanzado"' : ''}>+</button>
           </div>
           ${nota}
         </div>
@@ -93,9 +93,20 @@ function pintar() {
 // 2.2.1: cambiar cantidad. Con 0 el servidor elimina la prenda.
 async function cambiarCantidad(idDetallePedido, cantidad) {
   limpiarAvisos();
+  const detalle = carrito.detalles.find((d) => d.idDetallePedido === idDetallePedido);
+  if (cantidad > (sinExistencia[idDetallePedido] ?? detalle.stock)) {
+    mostrarAviso('alerta', 'Stock máximo alcanzado');
+    return;
+  }
   try {
     carrito = await api('PATCH', `/carrito/prendas/${idDetallePedido}`, { cantidad });
   } catch (error) {
+    if (error.error === 'SinExistenciaError') {
+      marcarSinExistencia(error.message);
+      pintar();
+      mostrarAviso('alerta', 'Stock máximo alcanzado', error.message);
+      return;
+    }
     avisoDeError(error);
     return;
   }

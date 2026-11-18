@@ -43,6 +43,11 @@ export class CarritoService {
     const yaEsta = carrito.detalles.find(
       (d) => d.idVariante === dto.idVariante,
     );
+    await this.validarExistencia(
+      prenda,
+      (yaEsta?.cantidad ?? 0) + dto.cantidad,
+      carrito.idPedido,
+    );
     if (yaEsta) {
       await this.repo.cambiarCantidad(
         yaEsta.idDetallePedido,
@@ -71,7 +76,12 @@ export class CarritoService {
     }
 
     const carrito = await this.carritoDe(idCliente);
-    this.detalleDe(carrito, idDetallePedido);
+    const detalle = this.detalleDe(carrito, idDetallePedido);
+    const prenda = await this.repo.buscarPrenda(detalle.idVariante);
+    if (!prenda) {
+      throw new PrendaNoEncontradaError(detalle.idVariante);
+    }
+    await this.validarExistencia(prenda, dto.cantidad, carrito.idPedido);
     await this.repo.cambiarCantidad(idDetallePedido, dto.cantidad);
     return this.actualizar(idCliente);
   }
@@ -158,6 +168,18 @@ export class CarritoService {
       expiraEn,
     );
     return expiraEn;
+  }
+
+  private async validarExistencia(
+    prenda: { idVariante: number; stock: number; nombre: string; talla: string; color: string },
+    cantidad: number,
+    idPedido: number,
+  ): Promise<void> {
+    const reservado = await this.repo.reservadoPorOtros(prenda.idVariante, idPedido, new Date());
+    const disponibles = Math.max(0, prenda.stock - reservado);
+    if (cantidad > disponibles) {
+      throw new SinExistenciaError(prenda.nombre, prenda.talla, prenda.color, disponibles);
+    }
   }
 
   private async carritoDe(idCliente: number): Promise<Carrito> {

@@ -1449,3 +1449,12 @@ td {
     width: 100%;
   }
 }
+
+.cant button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.campo .nota-error:empty {
+  display: none;
+}

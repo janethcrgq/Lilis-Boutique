@@ -51,6 +51,12 @@ async function iniciar() {
 }
 
 function conectarBotones() {
+  ['calle', 'numero', 'colonia', 'zona'].forEach((id) => {
+    const campo = document.getElementById(id);
+    campo.addEventListener(id === 'zona' ? 'change' : 'input', () => {
+      if (valor(id) && valor(id) !== 'fuera') marcarCampo(id, '');
+    });
+  });
   document.querySelectorAll('input[name="metodo"]').forEach((radio) => {
     radio.addEventListener('change', () => {
       estado.metodo = radio.value;
@@ -273,12 +279,16 @@ function valor(id) {
 
 // Regresa los datos para POST /direcciones, o null si falta algo.
 function leerFormulario() {
-  if (!valor('calle') || !valor('numero') || !valor('colonia')) {
-    mostrarAviso('error', 'Faltan datos de la dirección.', 'La calle, el número y la colonia son obligatorios.');
-    return null;
-  }
-  if (!valor('zona')) {
-    mostrarAviso('error', 'Elige la zona de envío.');
+  let primero = null;
+  ['calle', 'numero', 'colonia', 'zona'].forEach((id) => {
+    const mensaje = !valor(id) ? 'Este campo es requerido' :
+      id === 'zona' && !buscarZona(Number(valor(id))) ? 'Elige una zona de envío válida' : '';
+    marcarCampo(id, mensaje);
+    if (mensaje && !primero) primero = id;
+  });
+  if (primero) {
+    mostrarAviso('error', 'Revisa los campos marcados de la dirección.');
+    document.getElementById(primero).focus();
     return null;
   }
 
@@ -292,6 +302,13 @@ function leerFormulario() {
     datos.referencias = valor('referencias');
   }
   return datos;
+}
+
+function marcarCampo(id, mensaje) {
+  const campo = document.getElementById(id);
+  campo.closest('.campo').classList.toggle('error', Boolean(mensaje));
+  campo.setAttribute('aria-invalid', String(Boolean(mensaje)));
+  document.getElementById('error-' + id).textContent = mensaje;
 }
 
 function entregaA(direccion) {
