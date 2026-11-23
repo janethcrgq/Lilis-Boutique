@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
     cambiarTab(e.target.value === '2' ? 'cobro' : 'transferencias');
   });
 
-  cargarTransferencias();
+  cambiarTab(idPersonal() === 2 ? 'cobro' : 'transferencias');
 });
 
 function cambiarTab(tab) {

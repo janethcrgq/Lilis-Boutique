@@ -15,6 +15,11 @@ const PERSONAL = [
   { id: 2, nombre: 'Liliana Valdez', rol: 'Vendedora' },
 ];
 
+// Quien usa el panel (Duena 1 o Vendedora 2). Se guarda aparte de la clienta.
+function idPersonal() {
+  return Number(localStorage.getItem('lb.idPersonal')) || 1;
+}
+
 const ICONOS = {
   buscar: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>',
   bolsa: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 8h14l-1 13H6z"/><path d="M9 8V6a3 3 0 016 0v2"/></svg>',
@@ -86,13 +91,16 @@ function cabeceraClienta(navActivo) {
 }
 
 function cabeceraPanel() {
-  const opciones = PERSONAL.map((p) => `<option value="${p.id}">${p.nombre} · ${p.rol}</option>`).join('');
+  const actual = PERSONAL.find((p) => p.id === idPersonal()) || PERSONAL[0];
+  const opciones = PERSONAL.map(
+    (p) => `<option value="${p.id}"${p.id === actual.id ? ' selected' : ''}>${p.nombre} · ${p.rol}</option>`,
+  ).join('');
   return `
   <header class="barra">
     <a class="logo" href="boutique.html">${icono('mariposa')}<span><b>LILI'S</b><small>BOUTIQUE · PANEL</small></span></a>
     <nav class="nav"><span>PEDIDOS</span><a class="activo" href="boutique.html">PAGOS</a><span>ENVÍOS</span><span>CATÁLOGO</span></nav>
     <div class="iconos">
-      <span class="sesion"><i>${PERSONAL[0].nombre[0]}</i>
+      <span class="sesion"><i>${actual.nombre[0]}</i>
         <label><small>Entrar como</small><select id="selector-personal">${opciones}</select></label></span>
     </div>
   </header>`;
@@ -198,6 +206,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('selector-personal').addEventListener('change', (e) => {
       const persona = PERSONAL.find((p) => p.id === Number(e.target.value));
       document.querySelector('.sesion i').textContent = persona.nombre[0];
+      localStorage.setItem('lb.idPersonal', e.target.value);
     });
   } else {
     // Cambiar de clienta borra lo que llevaba la anterior.
