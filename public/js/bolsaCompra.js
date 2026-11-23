@@ -94,7 +94,7 @@ function pintar() {
 async function cambiarCantidad(idDetallePedido, cantidad) {
   limpiarAvisos();
   const detalle = carrito.detalles.find((d) => d.idDetallePedido === idDetallePedido);
-  if (cantidad > (sinExistencia[idDetallePedido] ?? detalle.stock)) {
+  if (cantidad > detalle.cantidad && cantidad > (sinExistencia[idDetallePedido] ?? detalle.stock)) {
     mostrarAviso('alerta', 'Stock máximo alcanzado');
     return;
   }

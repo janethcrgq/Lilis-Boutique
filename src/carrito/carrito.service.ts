@@ -77,11 +77,14 @@ export class CarritoService {
 
     const carrito = await this.carritoDe(idCliente);
     const detalle = this.detalleDe(carrito, idDetallePedido);
-    const prenda = await this.repo.buscarPrenda(detalle.idVariante);
-    if (!prenda) {
-      throw new PrendaNoEncontradaError(detalle.idVariante);
+    // REGLA: solo se valida la existencia si sube la cantidad; bajarla siempre se puede (2.2.6-A)
+    if (dto.cantidad > detalle.cantidad) {
+      const prenda = await this.repo.buscarPrenda(detalle.idVariante);
+      if (!prenda) {
+        throw new PrendaNoEncontradaError(detalle.idVariante);
+      }
+      await this.validarExistencia(prenda, dto.cantidad, carrito.idPedido);
     }
-    await this.validarExistencia(prenda, dto.cantidad, carrito.idPedido);
     await this.repo.cambiarCantidad(idDetallePedido, dto.cantidad);
     return this.actualizar(idCliente);
   }
